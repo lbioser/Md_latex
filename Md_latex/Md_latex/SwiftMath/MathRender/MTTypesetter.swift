@@ -348,7 +348,7 @@ func getBboxDetails(_ bbox:CGRect, ascent:inout CGFloat, descent:inout CGFloat) 
 class MTTypesetter {
     var font:MTFont!
     var displayAtoms = [MTDisplay]()
-    var currentPosition = CGPoint.zero
+    var nextPosition = CGPoint.zero
     var currentLine:NSMutableAttributedString!
     var currentAtoms = [MTMathAtom]()   // List of atoms that make the line
     var currentLineIndexRange = NSMakeRange(0, 0)
@@ -362,23 +362,24 @@ class MTTypesetter {
     }
     var cramped = false
     var spaced = false
-    
-    static func createLineForMathList(_ mathList:MTMathList?, font:MTFont?, style:MTLineStyle) -> MTMathListDisplay? {
+    var outest = false //最外层
+	static func createLineForMathList(_ mathList:MTMathList?, font:MTFont?, style:MTLineStyle, outest: Bool = false) -> MTMathListDisplay? {
         let finalizedList = mathList?.finalized
         // default is not cramped
-        return self.createLineForMathList(finalizedList, font:font, style:style, cramped:false)
+		return self.createLineForMathList(finalizedList, font:font, style:style, cramped:false, outest: outest)
     }
     
     // Internal
-    static func createLineForMathList(_ mathList:MTMathList?, font:MTFont?, style:MTLineStyle, cramped:Bool) -> MTMathListDisplay? {
-        return self.createLineForMathList(mathList, font:font, style:style, cramped:cramped, spaced:false)
+    static func createLineForMathList(_ mathList:MTMathList?, font:MTFont?, style:MTLineStyle, cramped:Bool, outest: Bool = false) -> MTMathListDisplay? {
+		return self.createLineForMathList(mathList, font:font, style:style, cramped:cramped, spaced:false, outest: outest)
     }
     
     // Internal
-    static func createLineForMathList(_ mathList:MTMathList?, font:MTFont?, style:MTLineStyle, cramped:Bool, spaced:Bool) -> MTMathListDisplay? {
+    static func createLineForMathList(_ mathList:MTMathList?, font:MTFont?, style:MTLineStyle, cramped:Bool, spaced:Bool, outest: Bool = false) -> MTMathListDisplay? {
         assert(font != nil)
         let preprocessedAtoms = self.preprocessMathList(mathList)
-        let typesetter = MTTypesetter(withFont:font, style:style, cramped:cramped, spaced:spaced)
+		let typesetter = MTTypesetter(withFont:font, style:style, cramped:cramped, spaced:spaced)
+		typesetter.outest = outest
         typesetter.createDisplayAtoms(preprocessedAtoms)
         let lastAtom = mathList!.atoms.last
         let last = lastAtom?.indexRange ?? NSMakeRange(0, 0)
@@ -391,7 +392,7 @@ class MTTypesetter {
     init(withFont font:MTFont?, style:MTLineStyle, cramped:Bool, spaced:Bool) {
         self.font = font
         self.displayAtoms = [MTDisplay]()
-        self.currentPosition = CGPoint.zero
+        self.nextPosition = CGPoint.zero
         self.cramped = cramped
         self.spaced = spaced
         self.currentLine = NSMutableAttributedString()
@@ -479,30 +480,31 @@ class MTTypesetter {
 	private func calcDisplayPosition(width:CGFloat, display: MTDisplay?, dx: CGFloat = 0, dy: CGFloat = 0) {
 		//单纯增加x
 		guard let display else {
-			currentPosition.x += width
+			nextPosition.x += width
 			return
 		}
-		//set x/y
-		display.position.x = currentPosition.x + dx
-		display.position.y = currentPosition.y + dy
 		
 		if !displayAtoms.contains(display) {
 			displayAtoms.append(display)
 		}
-		
-		
-		//
-		guard width > 0 else { return }
-		
-		//calc x/y
-		if currentPosition.x + width > viewMaxWidth {
-			currentPosition.x = 0
-			display.isWrapLine = true
+		if outest { //第一层才需要变y
+			if nextPosition.x + width + dx > viewMaxWidth {
+				display.isWrapLine = true
+				let y = findMaxHeight(in: displayAtoms, on: display)
+				display.position = CGPointMake(0, y)
+				nextPosition = CGPointMake(width + dx, y)
+			} else {
+				display.isWrapLine = false
+				display.position = CGPointMake(nextPosition.x + dx, nextPosition.y + dy)
+				nextPosition.x += (width + dx)
+			}
 		} else {
-			currentPosition.x += width
-			display.isWrapLine = false
+			display.position = CGPointMake(nextPosition.x + dx, nextPosition.y + dy)
+			nextPosition.x += (width + dx)
 		}
-		currentPosition.y = findMaxHeight(in: displayAtoms, on: display)
+		
+		//guard width > 0 else { return }
+		
 		
 	}
 	
@@ -820,7 +822,7 @@ class MTTypesetter {
          "The length of the current line: %@ does not match the length of the range (%d, %d)",
          currentLine, currentLineIndexRange.location, currentLineIndexRange.length);*/
         
-        let displayAtom = MTCTLineDisplay(withString:currentLine, position:currentPosition, range:currentLineIndexRange, font:styleFont, atoms:currentAtoms)
+        let displayAtom = MTCTLineDisplay(withString:currentLine, position:nextPosition, range:currentLineIndexRange, font:styleFont, atoms:currentAtoms)
 		calcDisplayPosition(width: displayAtom.width, display: displayAtom)
         // clear the string and the range
         currentLine = NSMutableAttributedString()
@@ -1067,7 +1069,7 @@ class MTTypesetter {
             }
         }
         
-        let display = MTFractionDisplay(withNumerator: numeratorDisplay, denominator: denominatorDisplay, position: currentPosition, range: frac!.indexRange)
+        let display = MTFractionDisplay(withNumerator: numeratorDisplay, denominator: denominatorDisplay, position: nextPosition, range: frac!.indexRange)
         
         display.numeratorUp = numeratorShiftUp;
         display.denominatorDown = denominatorShiftDown;
@@ -1104,7 +1106,7 @@ class MTTypesetter {
             innerElements.append(rightGlyph!)
         }
         let innerDisplay = MTMathListDisplay(withDisplays: innerElements, range: frac!.indexRange)
-        innerDisplay.position = currentPosition
+        innerDisplay.position = nextPosition
         return innerDisplay
     }
     
@@ -1164,7 +1166,7 @@ class MTTypesetter {
         let shiftUp = radicalAscent - glyph.ascent  // Note: if the font designer followed latex conventions, this is the same as glyphAscent == thickness.
         glyph.shiftDown = -shiftUp
         
-        let radical = MTRadicalDisplay(withRadicand: innerDisplay, glyph: glyph, position: currentPosition, range: range)
+        let radical = MTRadicalDisplay(withRadicand: innerDisplay, glyph: glyph, position: nextPosition, range: range)
         radical.ascent = radicalAscent + styleFont.mathTable!.radicalExtraAscender
         radical.topKern = styleFont.mathTable!.radicalExtraAscender
         radical.lineThickness = radicalRuleThickness
@@ -1339,14 +1341,14 @@ class MTTypesetter {
                 glyphDisplay.width -= delta;
             }
             glyphDisplay.shiftDown = shiftDown;
-            glyphDisplay.position = currentPosition;
+            glyphDisplay.position = nextPosition;
             return self.addLimitsToDisplay(glyphDisplay, forOperator:op, delta:delta)
         } else {
             // Create a regular node
             let line = NSMutableAttributedString(string: op.nucleus)
             // add the font
             line.addAttribute(kCTFontAttributeName as NSAttributedString.Key, value:styleFont.ctFont!, range:NSMakeRange(0, line.length))
-            let displayAtom = MTCTLineDisplay(withString: line, position: currentPosition, range: op.indexRange, font: styleFont, atoms: [op])
+            let displayAtom = MTCTLineDisplay(withString: line, position: nextPosition, range: op.indexRange, font: styleFont, atoms: [op])
             return self.addLimitsToDisplay(displayAtom, forOperator:op, delta:0)
         }
     }
@@ -1456,7 +1458,7 @@ class MTTypesetter {
     
     func makeUnderline(_ under:MTUnderLine?) -> MTDisplay? {
         let innerListDisplay = MTTypesetter.createLineForMathList(under!.innerList, font:font, style:style, cramped:cramped)
-        let underDisplay = MTLineDisplay(withInner: innerListDisplay, position: currentPosition, range: under!.indexRange)
+        let underDisplay = MTLineDisplay(withInner: innerListDisplay, position: nextPosition, range: under!.indexRange)
         // Move the line down by the vertical gap.
         underDisplay.lineShiftUp = -(innerListDisplay!.descent + styleFont.mathTable!.underbarVerticalGap);
         underDisplay.lineThickness = styleFont.mathTable!.underbarRuleThickness;
@@ -1468,7 +1470,7 @@ class MTTypesetter {
     
     func makeOverline(_ over:MTOverLine?) -> MTDisplay? {
         let innerListDisplay = MTTypesetter.createLineForMathList(over!.innerList, font:font, style:style, cramped:true)
-        let overDisplay = MTLineDisplay(withInner:innerListDisplay, position:currentPosition, range:over!.indexRange)
+        let overDisplay = MTLineDisplay(withInner:innerListDisplay, position:nextPosition, range:over!.indexRange)
         overDisplay.lineShiftUp = innerListDisplay!.ascent + styleFont.mathTable!.overbarVerticalGap;
         overDisplay.lineThickness = styleFont.mathTable!.underbarRuleThickness;
         overDisplay.ascent = innerListDisplay!.ascent + styleFont.mathTable!.overbarVerticalGap + styleFont.mathTable!.overbarRuleThickness + styleFont.mathTable!.overbarExtraAscender;
@@ -1599,7 +1601,7 @@ class MTTypesetter {
         display.descent = accentee!.descent;
         let ascent = accentee!.ascent - delta + glyphAscent;
         display.ascent = max(accentee!.ascent, ascent);
-        display.position = currentPosition;
+        display.position = nextPosition;
 
         return display;
     }
@@ -1631,7 +1633,7 @@ class MTTypesetter {
         // Position all the rows
         self.positionRows(rowDisplays, forTable:table)
         let tableDisplay = MTMathListDisplay(withDisplays: rowDisplays, range: table!.indexRange)
-        tableDisplay.position = currentPosition;
+        tableDisplay.position = nextPosition;
         return tableDisplay;
     }
     

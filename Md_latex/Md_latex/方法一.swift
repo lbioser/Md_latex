@@ -14,9 +14,7 @@ class ViewController: UIViewController {
 		super.viewDidLoad()
 		
 		label.latex = #"""
-			{\color{#ff0000} {ffffdsfdsfdsfdsfasdfdsfasdfdsafadsfdsfdsfdsfadsfasdff}}
-			\text{ff.sdafsadfsd}
-			1fx = \frac{-b \pm \sqrt{b^2-4ac}}{2a}
+			fx = \frac{-b \pm \sqrt{b^2-4ac}}{2a} \sqrt{b^2-4ac}\pm
 			"""#
 		view.addSubview(label)
 		label.backgroundColor = .gray
@@ -28,9 +26,7 @@ class ViewController: UIViewController {
 	}
 	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 		label.latex = #"""
-			{\color{#ff0000} {ffff}}
-			\text{ff.sdafsadfsd}
-			1fx = \frac{-b \pm \sqrt{b^2-4ac}}{2a}
+				fx = \frac{-b \pm \sqrt{b^2-4ac}}{2a} \sqrt{b^2-4ac}\pm
 			"""#
 	}
 	

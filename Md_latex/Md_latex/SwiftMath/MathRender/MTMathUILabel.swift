@@ -242,7 +242,7 @@ public class MTMathUILabel : MTView {
     func _layoutSubviews() {
         if _mathList != nil {
             // print("Pre list = \(_mathList!)")
-            _displayList = MTTypesetter.createLineForMathList(_mathList, font: font, style: currentStyle)
+			_displayList = MTTypesetter.createLineForMathList(_mathList, font: font, style: currentStyle, outest: true)
             _displayList!.textColor = textColor
             // print("Post list = \(_mathList!)")
             var textX = CGFloat(0)
@@ -271,7 +271,7 @@ public class MTMathUILabel : MTView {
         guard _mathList != nil else { return size }
         var size = size
         var displayList:MTMathListDisplay? = nil
-        displayList = MTTypesetter.createLineForMathList(_mathList, font: font, style: currentStyle)
+		displayList = MTTypesetter.createLineForMathList(_mathList, font: font, style: currentStyle, outest: true)
         size.width = displayList!.width + contentInsets.left + contentInsets.right
         size.height = displayList!.ascent + displayList!.descent + contentInsets.top + contentInsets.bottom
         return size

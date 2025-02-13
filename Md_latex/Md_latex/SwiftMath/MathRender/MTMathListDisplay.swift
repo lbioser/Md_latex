@@ -247,6 +247,7 @@ public class MTMathListDisplay : MTDisplay {
     }
 
     override public func draw(_ context: CGContext) {
+		let size = CGSizeMake(self.width, self.ascent + self.descent);
         super.draw(context)
         context.saveGState()
         
