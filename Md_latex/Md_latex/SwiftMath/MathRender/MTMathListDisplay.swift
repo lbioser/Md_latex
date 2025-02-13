@@ -100,6 +100,8 @@ public class MTDisplay:NSObject {
     var localTextColor: MTColor?
     /// The background color for this display
     var localBackgroundColor: MTColor?
+	//是否换行，true：代表换行，表示第行的第一个元素
+	var isWrapLine = false
     
 }
 
