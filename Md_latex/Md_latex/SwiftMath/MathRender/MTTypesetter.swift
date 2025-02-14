@@ -502,10 +502,6 @@ class MTTypesetter {
 			display.position = CGPointMake(nextPosition.x + dx, nextPosition.y + dy)
 			nextPosition.x += (width + dx)
 		}
-		
-		//guard width > 0 else { return }
-		
-		
 	}
 	
     func addInterElementSpace(_ prevNode:MTMathAtom?, currentType type:MTMathAtomType) {
