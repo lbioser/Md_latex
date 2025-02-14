@@ -362,6 +362,9 @@ public class MTFractionDisplay : MTDisplay {
 
     override public func draw(_ context:CGContext) {
         super.draw(context)
+		if isWrapLine {
+			context.translateBy(x: 0, y: -numeratorUp-linePosition)
+		}
         numerator?.draw(context)
         denominator?.draw(context)
 

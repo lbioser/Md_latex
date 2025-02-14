@@ -477,8 +477,7 @@ class MTTypesetter {
 		}
 	}
 	
-	//isFrac,true:不换行时dy=0，换行时y+dy
-	private func calcDisplayPosition(width:CGFloat, display: MTDisplay?, dx: CGFloat = 0, dy: CGFloat = 0, isFrac: Bool = false) {
+	private func calcDisplayPosition(width:CGFloat, display: MTDisplay?, dx: CGFloat = 0, dy: CGFloat = 0) {
 		//单纯增加x
 		guard let display else {
 			nextPosition.x += width
@@ -491,12 +490,12 @@ class MTTypesetter {
 		if outest { //第一层才需要变y
 			if nextPosition.x + width + dx > Self.viewMaxWidth && displayAtoms.count > 1{//只有一个元素时不换行
 				display.isWrapLine = true
-				let y = -(findMaxHeight(in: displayAtoms, on: display) + dy) //y 取负值
-				display.position = CGPointMake(0, y)
-				nextPosition = CGPointMake(width + dx, y)
+				let maxY = -(findMaxHeight(in: displayAtoms, on: display) + dy) //y 取负值
+				display.position = CGPointMake(0, maxY)
+				nextPosition = CGPointMake(width + dx, maxY)
 			} else {
 				display.isWrapLine = false
-				display.position = CGPointMake(nextPosition.x + dx, nextPosition.y + (isFrac ? 0 : dy))
+				display.position = CGPointMake(nextPosition.x + dx, nextPosition.y + dy)
 				nextPosition.x += (width + dx)
 			}
 		} else {
@@ -634,11 +633,9 @@ class MTTypesetter {
                     let frac = atom as! MTFraction?
                     self.addInterElementSpace(prevNode, currentType:atom.type)
                     let display = self.makeFraction(frac)
-					if let fracd = display as? MTFractionDisplay {
-						calcDisplayPosition(width: fracd.width, display: fracd, dy: fracd.denominatorDown, isFrac: true)
-					} else {
-						calcDisplayPosition(width: display!.width, display: display)
-					}
+					
+					calcDisplayPosition(width: display!.width, display: display)
+					
 				
                     // add super scripts || subscripts
                     if atom.subScript != nil || atom.superScript != nil {
