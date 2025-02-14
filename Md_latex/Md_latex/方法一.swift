@@ -14,12 +14,12 @@ class ViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		view.addGestureRecognizer(panPublisher)
-//		label.latex = #"""
-//			 \text{LaTex dong dong dong ...}fdfsdfsdfd{123123123}{\color{#ff0000} {rfffffdf}}\frac{1}{\left(\sqrt{\phi \sqrt{5}}-\phi\right) e^{\frac25 \pi}}
-//			 = 1+\frac{e^{-2\pi}} {1 +\frac{e^{-4\pi}} {1+\frac{e^{-6\pi}} {1+\frac{e^{-8\pi}} {1+\cdots} } } }
-//				   
-//			"""#
-		label.latex = #"\text{Text1  1}{Text2  2}Text3  3"#
+		label.latex = #"""
+			\text{Text1  1Text1  1Text1  1Text1  1Text1  1Text1  1Text1  1}{\pm\pm\pm}\pm\pm\pm{\color{#ff0000} {rfffffdf}}\frac{1}{\left(\sqrt{\phi \sqrt{5}}-\phi\right) e^{\frac25 \pi}}
+			 = 1+\frac{e^{-2\pi}} {1 +\frac{e^{-4\pi}} {1+\frac{e^{-6\pi}} {1+\frac{e^{-8\pi}} {1+\cdots} } } }
+				   
+			"""#
+//		label.latex = #"\text{Text1  1}{\pm\pm\pm}\pm\pm\pm"#
 		view.addSubview(label)
 		label.backgroundColor = .gray
 		label.center = view.center

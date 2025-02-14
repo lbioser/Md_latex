@@ -812,21 +812,43 @@ class MTTypesetter {
         }
     }
     
-    @discardableResult
-    func addDisplayLine() -> MTCTLineDisplay? {// 添加text
-        // add the font
-        currentLine.addAttribute(kCTFontAttributeName as NSAttributedString.Key, value:styleFont.ctFont as Any, range:NSMakeRange(0, currentLine.length))
-        /*assert(currentLineIndexRange.length == numCodePoints(currentLine.string),
-         "The length of the current line: %@ does not match the length of the range (%d, %d)",
-         currentLine, currentLineIndexRange.location, currentLineIndexRange.length);*/
-        
-        let displayAtom = MTCTLineDisplay(withString:currentLine, position:nextPosition, range:currentLineIndexRange, font:styleFont, atoms:currentAtoms)
-		calcDisplayPosition(width: displayAtom.width, display: displayAtom)
-        // clear the string and the range
-        currentLine = NSMutableAttributedString()
-        currentAtoms = [MTMathAtom]()
-        currentLineIndexRange = NSMakeRange(NSNotFound, NSNotFound)
-        return displayAtom
+	@discardableResult
+	func addDisplayLine(res: ((MTDisplay)->())? = nil) -> MTDisplay?{// 添加text
+		if outest {
+			// add the font
+			currentLine.addAttribute(kCTFontAttributeName as NSAttributedString.Key, value:styleFont.ctFont as Any, range:NSMakeRange(0, currentLine.length))
+			/*assert(currentLineIndexRange.length == numCodePoints(currentLine.string),
+			 "The length of the current line: %@ does not match the length of the range (%d, %d)",
+			 currentLine, currentLineIndexRange.location, currentLineIndexRange.length);*/
+			for (i, atom) in currentAtoms.enumerated() {
+				
+				let atr = currentLine.attributedSubstring(from: NSRange(location: i, length: 1))
+				let displayAtom = MTCTLineDisplay(withString:atr, position:nextPosition, range:currentLineIndexRange, font:styleFont, atoms:[atom])
+				
+				calcDisplayPosition(width: displayAtom.width, display: displayAtom)
+			}
+			
+			// clear the string and the range
+			currentLine = NSMutableAttributedString()
+			currentAtoms = [MTMathAtom]()
+			currentLineIndexRange = NSMakeRange(NSNotFound, NSNotFound)
+			return nil
+		} else {
+			// add the font
+			currentLine.addAttribute(kCTFontAttributeName as NSAttributedString.Key, value:styleFont.ctFont as Any, range:NSMakeRange(0, currentLine.length))
+			/*assert(currentLineIndexRange.length == numCodePoints(currentLine.string),
+			 "The length of the current line: %@ does not match the length of the range (%d, %d)",
+			 currentLine, currentLineIndexRange.location, currentLineIndexRange.length);*/
+			
+			let displayAtom = MTCTLineDisplay(withString:currentLine, position:nextPosition, range:currentLineIndexRange, font:styleFont, atoms:currentAtoms)
+			calcDisplayPosition(width: displayAtom.width, display: displayAtom)
+			// clear the string and the range
+			currentLine = NSMutableAttributedString()
+			currentAtoms = [MTMathAtom]()
+			currentLineIndexRange = NSMakeRange(NSNotFound, NSNotFound)
+			return displayAtom
+		}
+       
     }
     
     // MARK: - Spacing
