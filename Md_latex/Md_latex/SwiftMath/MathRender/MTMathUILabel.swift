@@ -83,14 +83,15 @@ public class MTMathUILabel : MTView {
                 _mathList = nil
                 _error = error
 //                self.errorLabel?.text = error!.localizedDescription
-                self.errorLabel?.frame = self.bounds
-                self.errorLabel?.isHidden = !self.displayErrorInline
-				self.errorLabel?.text = latex
+//                self.errorLabel?.frame = self.bounds
+//                self.errorLabel?.isHidden = !self.displayErrorInline
+//				self.errorLabel?.text = latex
             } else {
                 self.errorLabel?.isHidden = true
+				self.invalidateIntrinsicContentSize()
+				self.setNeedsLayout()
             }
-            self.invalidateIntrinsicContentSize()
-            self.setNeedsLayout()
+            
         }
         get { _latex }
     }
@@ -235,6 +236,7 @@ public class MTMathUILabel : MTView {
 #endif
         label.isHidden = true
 		label.textColor = _textColor
+		
         self.addSubview(label)
     }
     

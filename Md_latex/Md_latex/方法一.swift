@@ -12,7 +12,8 @@ class ViewController: UIViewController {
 	let label = MTMathUILabel()
 	var cancelSet: [AnyCancellable] = []
 	let latex = #"""
-			\text{Text1  1Text1  1Text1  1Text1  1Text1  1Text1  1Text1  1}{\pm\pm\pm}\pm\pm\pm{\color{#ff0000} {rfffffdf}}\frac{1}{\left(\sqrt{\phi \sqrt{5}}-\phi\right) e^{\frac25 \pi}}
+			\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm
+			 {\pm\pm\pm}\pm\pm\pm{\color{#ff0000} {rfffffdf}}\frac{1}{\left(\sqrt{\phi \sqrt{5}}-\phi\right) e^{\frac25 \pi}}
 			 = 1+\frac{e^{-2\pi}} {1 +\frac{e^{-4\pi}} {1+\frac{e^{-6\pi}} {1+\frac{e^{-8\pi}} {1+\cdots} } } }
 				   
 			"""#
@@ -50,6 +51,6 @@ class ViewController: UIViewController {
 	}
 	
 	var index = 0
-	lazy var timePublisher = Timer.publish(every: 0.1, on: .current, in: .common)
+	lazy var timePublisher = Timer.publish(every: 0.05, on: .current, in: .common)
 
 }
