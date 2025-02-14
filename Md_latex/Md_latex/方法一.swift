@@ -14,19 +14,19 @@ class ViewController: UIViewController {
 		super.viewDidLoad()
 		
 		label.latex = #"""
-			fx = \frac{-b \pm \sqrt{b^2-4ac}}{2a} \sqrt{b^2-4ac}\pm
+			=\frac{n \left( \frac{\sqrt{a^2+b^2} }{f} +a_{n}\right)}{2} 
 			"""#
 		view.addSubview(label)
 		label.backgroundColor = .gray
 		label.snp.makeConstraints { make in
 			make.center.equalToSuperview()
-//			make.width.equalTo(100)
-			make.height.equalTo(500)
+			make.width.equalTo(150)
+//			make.height.equalTo(500)
 		}
 	}
 	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 		label.latex = #"""
-				fx = \frac{-b \pm \sqrt{b^2-4ac}}{2a} \sqrt{b^2-4ac}\pm
+			x_{b^2}=\frac{n \left( \frac{\sqrt{a^2+b^2} }{f} +a_{n}\right)}{2*\frac{\sqrt{a^2+b^2} }{\frac{\sqrt{a^2+b^2} }{f}}} 
 			"""#
 	}
 	

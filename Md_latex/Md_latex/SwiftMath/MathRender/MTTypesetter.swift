@@ -346,6 +346,7 @@ func getBboxDetails(_ bbox:CGRect, ascent:inout CGFloat, descent:inout CGFloat) 
 // MARK: - MTTypesetter
 
 class MTTypesetter {
+	static var viewMaxWidth: CGFloat = 0
     var font:MTFont!
     var displayAtoms = [MTDisplay]()
     var nextPosition = CGPoint.zero
@@ -452,7 +453,6 @@ class MTTypesetter {
         }
     }
     
-	let viewMaxWidth: CGFloat = 100.0 //view的最大宽度，超过时换行
 	
 	private func findMaxHeight(in displays:[MTDisplay], on display:MTDisplay) -> CGFloat {
 		let heights = displays.map { d in
@@ -477,7 +477,8 @@ class MTTypesetter {
 		}
 	}
 	
-	private func calcDisplayPosition(width:CGFloat, display: MTDisplay?, dx: CGFloat = 0, dy: CGFloat = 0) {
+	//isFrac,true:不换行时dy=0，换行时y+dy
+	private func calcDisplayPosition(width:CGFloat, display: MTDisplay?, dx: CGFloat = 0, dy: CGFloat = 0, isFrac: Bool = false) {
 		//单纯增加x
 		guard let display else {
 			nextPosition.x += width
@@ -488,14 +489,14 @@ class MTTypesetter {
 			displayAtoms.append(display)
 		}
 		if outest { //第一层才需要变y
-			if nextPosition.x + width + dx > viewMaxWidth {
+			if nextPosition.x + width + dx > Self.viewMaxWidth && displayAtoms.count > 1{//只有一个元素时不换行
 				display.isWrapLine = true
-				let y = findMaxHeight(in: displayAtoms, on: display)
+				let y = -(findMaxHeight(in: displayAtoms, on: display) + dy) //y 取负值
 				display.position = CGPointMake(0, y)
 				nextPosition = CGPointMake(width + dx, y)
 			} else {
 				display.isWrapLine = false
-				display.position = CGPointMake(nextPosition.x + dx, nextPosition.y + dy)
+				display.position = CGPointMake(nextPosition.x + dx, nextPosition.y + (isFrac ? 0 : dy))
 				nextPosition.x += (width + dx)
 			}
 		} else {
@@ -633,8 +634,12 @@ class MTTypesetter {
                     let frac = atom as! MTFraction?
                     self.addInterElementSpace(prevNode, currentType:atom.type)
                     let display = self.makeFraction(frac)
-                    
-					calcDisplayPosition(width: display!.width, display: display)
+					if let fracd = display as? MTFractionDisplay {
+						calcDisplayPosition(width: fracd.width, display: fracd, dy: fracd.denominatorDown, isFrac: true)
+					} else {
+						calcDisplayPosition(width: display!.width, display: display)
+					}
+				
                     // add super scripts || subscripts
                     if atom.subScript != nil || atom.superScript != nil {
                         self.makeScripts(atom, display:display, index:UInt(frac!.indexRange.location), delta:0)

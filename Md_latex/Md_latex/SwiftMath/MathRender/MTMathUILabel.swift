@@ -208,8 +208,7 @@ public class MTMathUILabel : MTView {
         _fontSize = 20
         _contentInsets = MTEdgeInsetsZero
         _labelMode = .display
-        let font = MTFontManager.fontManager.defaultFont
-        self.font = font
+		self.font = MTFontManager.fontManager.defaultFont
         _textAlignment = .left
         _displayList = nil
         displayErrorInline = true
@@ -242,6 +241,7 @@ public class MTMathUILabel : MTView {
     func _layoutSubviews() {
         if _mathList != nil {
             // print("Pre list = \(_mathList!)")
+			MTTypesetter.viewMaxWidth = frame.width //设定最大换行的宽度
 			_displayList = MTTypesetter.createLineForMathList(_mathList, font: font, style: currentStyle, outest: true)
             _displayList!.textColor = textColor
             // print("Post list = \(_mathList!)")

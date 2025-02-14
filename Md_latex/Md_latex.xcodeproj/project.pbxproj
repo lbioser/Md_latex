@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		89097D0C2D5C6A6F0083B5D8 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 89097D0B2D5C6A6F0083B5D8 /* SnapKit */; };
+		891880352D5EF121004D3CA6 /* SwiftMath in Frameworks */ = {isa = PBXBuildFile; productRef = 891880342D5EF121004D3CA6 /* SwiftMath */; };
 		891B71732D59FB46006CA4C3 /* Down in Frameworks */ = {isa = PBXBuildFile; productRef = 891B71722D59FB46006CA4C3 /* Down */; };
 /* End PBXBuildFile section */
 
@@ -68,6 +69,7 @@
 			files = (
 				89097D0C2D5C6A6F0083B5D8 /* SnapKit in Frameworks */,
 				891B71732D59FB46006CA4C3 /* Down in Frameworks */,
+				891880352D5EF121004D3CA6 /* SwiftMath in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,6 +138,7 @@
 			packageProductDependencies = (
 				891B71722D59FB46006CA4C3 /* Down */,
 				89097D0B2D5C6A6F0083B5D8 /* SnapKit */,
+				891880342D5EF121004D3CA6 /* SwiftMath */,
 			);
 			productName = Md_latex;
 			productReference = 891B71592D59FB22006CA4C3 /* Md_latex.app */;
@@ -171,6 +174,7 @@
 			packageReferences = (
 				891B71712D59FB46006CA4C3 /* XCRemoteSwiftPackageReference "Down" */,
 				89097D0A2D5C6A6F0083B5D8 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				891880332D5EF121004D3CA6 /* XCRemoteSwiftPackageReference "SwiftMath" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 891B715A2D59FB22006CA4C3 /* Products */;
@@ -453,6 +457,14 @@
 				minimumVersion = 5.7.1;
 			};
 		};
+		891880332D5EF121004D3CA6 /* XCRemoteSwiftPackageReference "SwiftMath" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mgriebling/SwiftMath";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.7.1;
+			};
+		};
 		891B71712D59FB46006CA4C3 /* XCRemoteSwiftPackageReference "Down" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/johnxnguyen/Down.git";
@@ -468,6 +480,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 89097D0A2D5C6A6F0083B5D8 /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
+		};
+		891880342D5EF121004D3CA6 /* SwiftMath */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 891880332D5EF121004D3CA6 /* XCRemoteSwiftPackageReference "SwiftMath" */;
+			productName = SwiftMath;
 		};
 		891B71722D59FB46006CA4C3 /* Down */ = {
 			isa = XCSwiftPackageProductDependency;
