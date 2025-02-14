@@ -32,7 +32,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "817"
             endingLineNumber = "817"
-            landmarkName = "addDisplayLine(res:)"
+            landmarkName = "addDisplayLine(isOrdinary:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

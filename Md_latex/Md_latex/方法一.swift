@@ -12,8 +12,16 @@ class ViewController: UIViewController {
 	let label = MTMathUILabel()
 	var cancelSet: [AnyCancellable] = []
 	let latex = #"""
-			\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm\pm
-			 {\pm\pm\pm}\pm\pm\pm{\color{#ff0000} {rfffffdf}}\frac{1}{\left(\sqrt{\phi \sqrt{5}}-\phi\right) e^{\frac25 \pi}}
+			\text{1234567890abcdefgABCDEFG}
+			{\color{#ff0000} {1234567890abcdefgABCDEFG}}
+			f(x) = \int\limits_{-\infty}^\infty\!\hat f(\xi)\,e^{2 \pi i \xi x}\,\mathrm{d}\xi
+			{\color{#ff0000} {rfffffdf}}
+			f(x) = \int\limits_{-\infty}^\infty\!\hat f(\xi)\,e^{2 \pi i \xi x}\,\mathrm{d}\xi
+				{\color{#ff0000} {123213213}}
+			   \frac{1}{n}\sum_{i=1}^{n}x_i \geq \sqrt[n]{\prod_{i=1}^{n}x_i}
+			   \frac{1}{n}\sum_{i=1}^{n}x_i \geq \sqrt[n]{\prod_{i=1}^{n}x_i}
+			   \frac{1}{n}\sum_{i=1}^{n}x_i \geq \sqrt[n]{\prod_{i=1}^{n}x_i}
+			\frac{1}{\left(\sqrt{\phi \sqrt{5}}-\phi\right) e^{\frac25 \pi}}
 			 = 1+\frac{e^{-2\pi}} {1 +\frac{e^{-4\pi}} {1+\frac{e^{-6\pi}} {1+\frac{e^{-8\pi}} {1+\cdots} } } }
 				   
 			"""#
@@ -23,6 +31,12 @@ class ViewController: UIViewController {
 		view.addGestureRecognizer(panPublisher)
 
 		view.addSubview(label)
+//		label.latex = #"""
+//			
+//				F{X}\text{1234567890abcdefgABCDEFG}
+//
+//			"""#
+		label.latex = latex
 		label.frame = view.bounds
 		label.backgroundColor = .gray
 		timePublisher.sink {[weak self] t in
@@ -35,7 +49,7 @@ class ViewController: UIViewController {
 	}
 	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
-		timePublisher.connect()
+//		timePublisher.connect()
 	}
 	var lastP: CGPoint = .zero
 	@objc func pan(_ ges: UIPanGestureRecognizer) {
@@ -53,4 +67,8 @@ class ViewController: UIViewController {
 	var index = 0
 	lazy var timePublisher = Timer.publish(every: 0.05, on: .current, in: .common)
 
+	
+	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+		index = 0
+	}
 }

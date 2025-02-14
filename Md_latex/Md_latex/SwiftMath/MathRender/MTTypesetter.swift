@@ -784,7 +784,7 @@ class MTTypesetter {
                     if atom.subScript != nil || atom.superScript != nil {
                         // stash the existing line
                         // We don't check currentLine.length here since we want to allow empty lines with super/sub scripts.
-                        let line = self.addDisplayLine()
+						let line = self.addDisplayLine(isOrdinary: true)
                         var delta = CGFloat(0)
                         if !atom.nucleus.isEmpty {
                             // Use the italic correction of the last character.
@@ -814,8 +814,8 @@ class MTTypesetter {
     }
     
 	@discardableResult
-	func addDisplayLine(res: ((MTDisplay)->())? = nil) -> MTDisplay?{// 添加text
-		if outest {
+	func addDisplayLine(isOrdinary: Bool = false) -> MTDisplay?{// 添加text
+		if outest && !isOrdinary{// 把文本拆成一个一个的字
 			// add the font
 			currentLine.addAttribute(kCTFontAttributeName as NSAttributedString.Key, value:styleFont.ctFont as Any, range:NSMakeRange(0, currentLine.length))
 			/*assert(currentLineIndexRange.length == numCodePoints(currentLine.string),
@@ -910,6 +910,7 @@ class MTTypesetter {
     // make scripts for the last atom
     // index is the index of the element which is getting the sub/super scripts.
     func makeScripts(_ atom: MTMathAtom?, display:MTDisplay?, index:UInt, delta:CGFloat) {
+		guard atom != nil && display != nil else { return }
         assert(atom!.subScript != nil || atom!.superScript != nil)
         
         var superScriptShiftUp = 0.0
