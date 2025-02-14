@@ -82,9 +82,10 @@ public class MTMathUILabel : MTView {
             if error != nil {
                 _mathList = nil
                 _error = error
-                self.errorLabel?.text = error!.localizedDescription
+//                self.errorLabel?.text = error!.localizedDescription
                 self.errorLabel?.frame = self.bounds
                 self.errorLabel?.isHidden = !self.displayErrorInline
+				self.errorLabel?.text = latex
             } else {
                 self.errorLabel?.isHidden = true
             }
@@ -102,6 +103,13 @@ public class MTMathUILabel : MTView {
     /** If true, if there is an error it displays the error message inline. Default true. */
     public var displayErrorInline = true
     
+	//换间距离
+	public var lineGap: CGFloat = 10 {
+		didSet {
+			MTTypesetter.lineGap = lineGap
+		}
+	}
+	
     /** The MTFont to use for rendering. */
     public var font:MTFont? {
         set {
@@ -216,6 +224,9 @@ public class MTMathUILabel : MTView {
         
         _textColor = MTColor.black
         let label = MTLabel()
+		label.frame = frame
+		label.numberOfLines = 0
+		
         self.errorLabel = label
 #if os(macOS)
         label.layer?.isGeometryFlipped = true
@@ -223,7 +234,7 @@ public class MTMathUILabel : MTView {
         label.layer.isGeometryFlipped = true
 #endif
         label.isHidden = true
-        label.textColor = MTColor.red
+		label.textColor = _textColor
         self.addSubview(label)
     }
     

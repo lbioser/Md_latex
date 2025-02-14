@@ -347,6 +347,7 @@ func getBboxDetails(_ bbox:CGRect, ascent:inout CGFloat, descent:inout CGFloat) 
 
 class MTTypesetter {
 	static var viewMaxWidth: CGFloat = 0
+	static var lineGap: CGFloat = 10
     var font:MTFont!
     var displayAtoms = [MTDisplay]()
     var nextPosition = CGPoint.zero
@@ -474,7 +475,7 @@ class MTTypesetter {
 		guard disPlayIndex < maxHeightsInWrap.count else { return 0}
 		return maxHeightsInWrap[0...disPlayIndex].reduce(0) { partialResult, next in
 			partialResult+next
-		}
+		} + CGFloat(disPlayIndex+1)*Self.lineGap
 	}
 	
 	private func calcDisplayPosition(width:CGFloat, display: MTDisplay?, dx: CGFloat = 0, dy: CGFloat = 0) {

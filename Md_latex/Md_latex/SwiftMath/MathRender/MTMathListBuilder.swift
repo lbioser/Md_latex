@@ -590,7 +590,7 @@ public struct MTMathListBuilder {
         } else if command == "color" {
             // A color command has 2 arguments
             let mathColor = MTMathColor()
-            mathColor.colorString = self.readColor()!
+			mathColor.colorString = self.readColor() ?? "0x0"
             mathColor.innerList = self.buildInternal(true)
             return mathColor
         } else if command == "textcolor" {
