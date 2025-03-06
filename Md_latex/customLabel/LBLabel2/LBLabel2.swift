@@ -10,12 +10,19 @@ import CoreText
 
 class LBLabel2: UIView {
     
-    var placeholerRects: [CGRect] = [] //占位rect
+    public var placeholerRects: [CGRect] = [] //占位rect
+    
+    private var runRects: [(CTRun,CGRect)] = []
     
     var attributedText: NSAttributedString?
     
     override func draw(_ rect: CGRect) {
         
+        clear()
+        let bounds = bounds
+        guard let attributedText else {
+            return
+        }
         DispatchQueue.global().async {[self] in
             
             let render = UIGraphicsImageRenderer(bounds: bounds)
@@ -25,10 +32,7 @@ class LBLabel2: UIView {
                 ctx.textMatrix = .identity
                 ctx.scaleBy(x: 1, y: -1)
                 ctx.translateBy(x: 0, y: -bounds.height)
-                guard let attributedText else {
-                    ctx.restoreGState()
-                    return
-                }
+                
                 let frameSetter = CTFramesetterCreateWithAttributedString(attributedText)
                 let ctframe = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, attributedText.length), UIBezierPath(rect: bounds).cgPath, nil)
                 // 建设尺寸，能容纳的最小尺寸
@@ -75,16 +79,24 @@ class LBLabel2: UIView {
                         ctx.restoreGState()
                         
                         
+                        
                         let attributes = CTRunGetAttributes(run) as! [NSAttributedString.Key:Any]
-
+                        
+                        let realRunRect = CGRect(x: leading+offsetx, y: bounds.height - (origin.y-descent) - (ascent+descent), width: w, height: ascent+descent)
+                        
+                        runRects.append((run, realRunRect))
+                        
                         if let runDelegate = attributes[kCTRunDelegateAttributeName as NSAttributedString.Key] {
                             let d = runDelegate as! CTRunDelegate
                             let rundelegateInfoP = CTRunDelegateGetRefCon(runDelegate as! CTRunDelegate)
                             let info = Unmanaged<RunDelegateInfo>.fromOpaque(rundelegateInfoP).takeUnretainedValue()
-                            let viewRect = CGRect(x: leading+offsetx, y: bounds.height - (origin.y-descent) - (ascent+descent), width: w, height: ascent+descent)
-                            placeholerRects.append(viewRect)
+                            
+                            placeholerRects.append(realRunRect)
                         }
                         
+                        if let clicked = attributes[.click] as? Bool, clicked{
+                            
+                        }
                         
                         
                     }
@@ -106,6 +118,83 @@ class LBLabel2: UIView {
         
     }
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        let touch = touches.first
+        let location = touch?.location(in: self) ?? CGPoint(x: 0, y: CGFloat.infinity)
+        for (run, rect) in runRects {
+            if rect.contains(location) {
+                let clickedStr = joinRuns(findAroundRun(by: .click, around: run))
+                print(clickedStr)
+                break
+            }
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        
+    }
+    
+    
+    /// 查找run附近的run，有一样的属性key
+    /// - Parameters:
+    ///   - key: key
+    ///   - run: 被查找的run
+    /// - Returns: 附近的runs
+    private func findAroundRun(by key: NSAttributedString.Key, around run: CTRun) -> [CTRun] {
+        let attributes = CTRunGetAttributes(run) as! [NSAttributedString.Key:Any]
+        var runs: [CTRun] = []
+        if let index = runRects.firstIndex(where: { (r, rect) in
+            r == run
+        }), attributes[key] != nil {
+            
+            runs.append(run)
+            // 向前找：
+            for i in stride(from: index-1, to: 0, by: -1) {
+                let attributes = CTRunGetAttributes(runRects[i].0) as! [NSAttributedString.Key:Any]
+                if let _ = attributes[key] {
+                    runs.insert(runRects[i].0, at: 0)
+                } else {
+                    break
+                }
+              
+            }
+            //向后找：
+            for i in stride(from: index+1, to: runRects.count, by: 1) {
+                let attributes = CTRunGetAttributes(runRects[i].0) as! [NSAttributedString.Key:Any]
+                if let _ = attributes[key] {
+                    runs.append(runRects[i].0)
+                } else {
+                    break
+                }
+            }
+            return runs
+        }
+        
+        return []
+    }
+    
+    
+    private func joinRuns(_ runs: [CTRun]) -> String {
+        var str = ""
+        runs.forEach { run in
+            let range = CTRunGetStringRange(run)
+            let string = attributedText!.string
+            let subStr = string[string.index(string.startIndex, offsetBy: range.location)..<string.index(string.startIndex, offsetBy: range.location+range.length)]
+            str += subStr
+        }
+        
+        return str
+    }
+    
+    
+    private func clear() {
+        placeholerRects.removeAll(keepingCapacity: true)
+        runRects.removeAll(keepingCapacity: true)
+        subviews.forEach { $0.removeFromSuperview() }
+    }
+    
 }
 
 let defaultAtr = {
@@ -115,7 +204,7 @@ let defaultAtr = {
     para.lineSpacing = 10
     atr.addAttribute(.paragraphStyle, value: para, range: atr.range)
     atr.addAttribute(.kern, value: 5, range: atr.range)
-    atr.insert(NSAttributedString(string: "high high low low", attributes: [.font:UIFont.systemFont(ofSize: 30)]), at: 20)
+    atr.insert(NSAttributedString(string: "high high low low", attributes: [.font:UIFont.systemFont(ofSize: 30), .click:true]), at: 20)
     var callbacks = CTRunDelegateCallbacks(
         version: kCTRunDelegateVersion1,
         dealloc: deallocCallback,
@@ -140,15 +229,3 @@ let defaultAtr = {
 }()
 
 
-
-extension CFRange {
-    static var zero: CFRange {
-        return CFRange(location: 0, length: 0)
-    }
-}
-
-extension NSAttributedString {
-    var range: NSRange {
-        return NSRange(location: 0, length: self.length)
-    }
-}
