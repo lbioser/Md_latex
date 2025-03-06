@@ -10,6 +10,7 @@
 		89097D0C2D5C6A6F0083B5D8 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 89097D0B2D5C6A6F0083B5D8 /* SnapKit */; };
 		891880352D5EF121004D3CA6 /* SwiftMath in Frameworks */ = {isa = PBXBuildFile; productRef = 891880342D5EF121004D3CA6 /* SwiftMath */; };
 		891B71732D59FB46006CA4C3 /* Down in Frameworks */ = {isa = PBXBuildFile; productRef = 891B71722D59FB46006CA4C3 /* Down */; };
+		D6F0BEE72D78467600AE562A /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = D6F0BEE62D78467600AE562A /* SnapKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,6 +28,7 @@
 /* Begin PBXFileReference section */
 		89097CE82D5ADBBD0083B5D8 /* asmt */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = asmt; sourceTree = BUILT_PRODUCTS_DIR; };
 		891B71592D59FB22006CA4C3 /* Md_latex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Md_latex.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6F0BECB2D783D8300AE562A /* customLabel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = customLabel.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +38,13 @@
 				Info.plist,
 			);
 			target = 891B71582D59FB22006CA4C3 /* Md_latex */;
+		};
+		D6F0BEDE2D783D8300AE562A /* Exceptions for "customLabel" folder in "customLabel" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D6F0BECA2D783D8300AE562A /* customLabel */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -51,6 +60,14 @@
 				891B716B2D59FB24006CA4C3 /* Exceptions for "Md_latex" folder in "Md_latex" target */,
 			);
 			path = Md_latex;
+			sourceTree = "<group>";
+		};
+		D6F0BECC2D783D8300AE562A /* customLabel */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D6F0BEDE2D783D8300AE562A /* Exceptions for "customLabel" folder in "customLabel" target */,
+			);
+			path = customLabel;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -73,6 +90,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D6F0BEC82D783D8300AE562A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D6F0BEE72D78467600AE562A /* SnapKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -81,6 +106,8 @@
 			children = (
 				891B715B2D59FB22006CA4C3 /* Md_latex */,
 				89097CE92D5ADBBD0083B5D8 /* asmt */,
+				D6F0BECC2D783D8300AE562A /* customLabel */,
+				D6F0BEE52D78467600AE562A /* Frameworks */,
 				891B715A2D59FB22006CA4C3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,8 +117,16 @@
 			children = (
 				891B71592D59FB22006CA4C3 /* Md_latex.app */,
 				89097CE82D5ADBBD0083B5D8 /* asmt */,
+				D6F0BECB2D783D8300AE562A /* customLabel.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D6F0BEE52D78467600AE562A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -144,6 +179,29 @@
 			productReference = 891B71592D59FB22006CA4C3 /* Md_latex.app */;
 			productType = "com.apple.product-type.application";
 		};
+		D6F0BECA2D783D8300AE562A /* customLabel */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D6F0BEDF2D783D8300AE562A /* Build configuration list for PBXNativeTarget "customLabel" */;
+			buildPhases = (
+				D6F0BEC72D783D8300AE562A /* Sources */,
+				D6F0BEC82D783D8300AE562A /* Frameworks */,
+				D6F0BEC92D783D8300AE562A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D6F0BECC2D783D8300AE562A /* customLabel */,
+			);
+			name = customLabel;
+			packageProductDependencies = (
+				D6F0BEE62D78467600AE562A /* SnapKit */,
+			);
+			productName = customLabel;
+			productReference = D6F0BECB2D783D8300AE562A /* customLabel.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -151,7 +209,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1610;
+				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
 					89097CE72D5ADBBD0083B5D8 = {
@@ -159,6 +217,9 @@
 					};
 					891B71582D59FB22006CA4C3 = {
 						CreatedOnToolsVersion = 16.1;
+					};
+					D6F0BECA2D783D8300AE562A = {
+						CreatedOnToolsVersion = 16.2;
 					};
 				};
 			};
@@ -183,12 +244,20 @@
 			targets = (
 				891B71582D59FB22006CA4C3 /* Md_latex */,
 				89097CE72D5ADBBD0083B5D8 /* asmt */,
+				D6F0BECA2D783D8300AE562A /* customLabel */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		891B71572D59FB22006CA4C3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D6F0BEC92D783D8300AE562A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -206,6 +275,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		891B71552D59FB22006CA4C3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D6F0BEC72D783D8300AE562A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -416,6 +492,62 @@
 			};
 			name = Release;
 		};
+		D6F0BEDC2D783D8300AE562A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = customLabel/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ff.customLabel;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D6F0BEDD2D783D8300AE562A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = customLabel/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ff.customLabel;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -442,6 +574,15 @@
 			buildConfigurations = (
 				891B716D2D59FB24006CA4C3 /* Debug */,
 				891B716E2D59FB24006CA4C3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D6F0BEDF2D783D8300AE562A /* Build configuration list for PBXNativeTarget "customLabel" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D6F0BEDC2D783D8300AE562A /* Debug */,
+				D6F0BEDD2D783D8300AE562A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -490,6 +631,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 891B71712D59FB46006CA4C3 /* XCRemoteSwiftPackageReference "Down" */;
 			productName = Down;
+		};
+		D6F0BEE62D78467600AE562A /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 89097D0A2D5C6A6F0083B5D8 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
