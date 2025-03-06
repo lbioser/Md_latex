@@ -10,11 +10,27 @@ import CoreText
 
 class LBLabel2: UIView {
     
+    public var attributedText: NSAttributedString? {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
+    
     public var placeholerRects: [CGRect] = [] //占位rect
+    
+    private(set) var textSuggestHeight: CGFloat = 0 {
+        didSet {
+            DispatchQueue.main.async {[self] in 
+                invalidateIntrinsicContentSize()
+            }
+        }
+    }
     
     private var runRects: [(CTRun,CGRect)] = []
     
-    var attributedText: NSAttributedString?
+    
+    
+    //MARK: - core draw
     
     override func draw(_ rect: CGRect) {
         
@@ -36,7 +52,8 @@ class LBLabel2: UIView {
                 let frameSetter = CTFramesetterCreateWithAttributedString(attributedText)
                 let ctframe = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, attributedText.length), UIBezierPath(rect: bounds).cgPath, nil)
                 // 建设尺寸，能容纳的最小尺寸
-                let s = CTFramesetterSuggestFrameSizeWithConstraints(frameSetter, CFRange.zero, nil, bounds.size, nil)
+                let suggestSize = CTFramesetterSuggestFrameSizeWithConstraints(frameSetter, CFRange.zero, nil, bounds.size, nil)
+                textSuggestHeight = suggestSize.height
                 let lines = CTFrameGetLines(ctframe) as! [CTLine]
                 let lineCount = lines.count
                 var origins:[CGPoint] = .init(repeating: .zero, count: lineCount)
@@ -118,6 +135,17 @@ class LBLabel2: UIView {
         
     }
     
+    override var intrinsicContentSize: CGSize {
+        return CGSize(width: bounds.width, height: textSuggestHeight)
+    }
+    
+    
+    //MARK: -
+    
+    
+    
+    
+    //MARK: - for click
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         let touch = touches.first
@@ -188,6 +216,7 @@ class LBLabel2: UIView {
         return str
     }
     
+    //MARK: - clear
     
     private func clear() {
         placeholerRects.removeAll(keepingCapacity: true)
@@ -196,6 +225,13 @@ class LBLabel2: UIView {
     }
     
 }
+
+
+
+
+
+
+//MARK: temp demo NSMutableAttributedString for test
 
 let defaultAtr = {
     let atr = NSMutableAttributedString(string: "1234567890asd jkl kl 1we re we && * f8)) )())))) |||| fdf /// fd; fd fd;; ///// // // // // 34 ")

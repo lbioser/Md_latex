@@ -16,6 +16,7 @@ class ViewController: UIViewController {
         view.addSubview(v)
         v.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview().inset(100)
+//            make.height.equalTo(500)
             make.height.equalTo(500)
             
         }
