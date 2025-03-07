@@ -1,5 +1,5 @@
 //
-//  LBLabel2.swift
+//  LBLabel.swift
 //  Md_latex
 //
 //  Created by libing on 6/3/25.
@@ -8,9 +8,9 @@
 import UIKit
 import CoreText
 
-class LBLabel2: UIView {
+class LBLabel: UILabel {
     
-    public var attributedText: NSAttributedString? {
+    public override var attributedText: NSAttributedString? {
         didSet {
             setNeedsDisplay()
         }
@@ -18,10 +18,12 @@ class LBLabel2: UIView {
     
     public var placeholerRects: [CGRect] = [] //占位rect
     
+    public var updateHeightHandler: ((CGFloat) -> ())?
+    
     private(set) var textSuggestHeight: CGFloat = 0 {
         didSet {
-            DispatchQueue.main.async {[self] in 
-                invalidateIntrinsicContentSize()
+            DispatchQueue.main.async {[self] in
+                updateHeightHandler?(textSuggestHeight)
             }
         }
     }
@@ -33,32 +35,37 @@ class LBLabel2: UIView {
     //MARK: - core draw
     
     override func draw(_ rect: CGRect) {
-        
         clear()
         guard let attributedText else {
             return
         }
-        let bounds = bounds
+        //height大了之后会很卡,先取10_000
+        let realHeight = bounds.height
+        let height: CGFloat = 10_000
+        let width: CGFloat = bounds.width
+        let esatimalBounds = CGRect(x: 0, y: 0, width: width, height: height) //让attributedText能绘制完，不截断，所以设置了很大的高
+        print("------------")
         DispatchQueue.global().async {[self] in
             
-            let render = UIGraphicsImageRenderer(bounds: bounds)
+            let frameSetter = CTFramesetterCreateWithAttributedString(attributedText)
+            let ctframe = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, attributedText.length), UIBezierPath(rect: esatimalBounds).cgPath, nil)
+            // 建设尺寸，能容纳的最小尺寸
+            let suggestSize = CTFramesetterSuggestFrameSizeWithConstraints(frameSetter, CFRange.zero, nil, esatimalBounds.size, nil)
+           
+            let lines = CTFrameGetLines(ctframe) as! [CTLine]
+            let lineCount = lines.count
+            var origins:[CGPoint] = .init(repeating: .zero, count: lineCount)
+            CTFrameGetLineOrigins(ctframe, CFRange.zero, &origins)
+            
+            let renderBounds = CGRect(x: 0, y: 0, width: width, height: realHeight) // 实际渲染的rect，和esatimalBounds不一样大
+            let render = UIGraphicsImageRenderer(bounds: renderBounds)
             let img = render.image { renderCtx in
                 let ctx = renderCtx.cgContext
                 ctx.saveGState()
                 ctx.textMatrix = .identity
+                ctx.translateBy(x: 0, y: height)
                 ctx.scaleBy(x: 1, y: -1)
-                ctx.translateBy(x: 0, y: -bounds.height)
                 
-                let frameSetter = CTFramesetterCreateWithAttributedString(attributedText)
-                let ctframe = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, attributedText.length), UIBezierPath(rect: bounds).cgPath, nil)
-                // 建设尺寸，能容纳的最小尺寸
-                let suggestSize = CTFramesetterSuggestFrameSizeWithConstraints(frameSetter, CFRange.zero, nil, bounds.size, nil)
-                textSuggestHeight = suggestSize.height
-                let lines = CTFrameGetLines(ctframe) as! [CTLine]
-                let lineCount = lines.count
-                var origins:[CGPoint] = .init(repeating: .zero, count: lineCount)
-                CTFrameGetLineOrigins(ctframe, CFRange.zero, &origins)
-               
                 //手动调整行高
 //                var i = -1
 //                origins = origins.map({ p in
@@ -95,11 +102,9 @@ class LBLabel2: UIView {
                         ctx.strokePath()
                         ctx.restoreGState()
                         
-                        
-                        
                         let attributes = CTRunGetAttributes(run) as! [NSAttributedString.Key:Any]
                         
-                        let realRunRect = CGRect(x: leading+offsetx, y: bounds.height - (origin.y-descent) - (ascent+descent), width: w, height: ascent+descent)
+                        let realRunRect = CGRect(x: leading+offsetx, y: esatimalBounds.height - (origin.y-descent) - (ascent+descent), width: w, height: ascent+descent)
                         
                         runRects.append((run, realRunRect))
                         
@@ -123,6 +128,7 @@ class LBLabel2: UIView {
             }
             
             DispatchQueue.main.async {
+                textSuggestHeight = suggestSize.height
                 self.layer.contents = img.cgImage
                 placeholerRects.forEach { rect in
                     let v = UIView(frame: rect)
@@ -133,10 +139,6 @@ class LBLabel2: UIView {
             
         }
         
-    }
-    
-    override var intrinsicContentSize: CGSize {
-        return CGSize(width: bounds.width, height: textSuggestHeight)
     }
     
     
@@ -265,5 +267,3 @@ let defaultAtr = {
 
     return atr
 }()
-
-

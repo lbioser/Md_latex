@@ -7,15 +7,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "585C526E-2900-4CB1-AE44-91720139A864"
-            shouldBeEnabled = "No"
+            uuid = "1F661B9B-0EB7-48F7-B7CC-AE7141750508"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "customLabel/LBLabel2/LBLabel2.swift"
+            filePath = "customLabel/LBLabel2/LBLabel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "82"
-            endingLineNumber = "82"
+            startingLineNumber = "132"
+            endingLineNumber = "132"
             landmarkName = "draw(_:)"
             landmarkType = "7">
          </BreakpointContent>

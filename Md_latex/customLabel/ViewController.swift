@@ -9,18 +9,21 @@ import UIKit
 import SnapKit
 import CoreText
 class ViewController: UIViewController {
-    let v = LBLabel2()
+    let v = LBLabel()
     override func viewDidLoad() {
         super.viewDidLoad()
         v.attributedText = defaultAtr
+        v.isUserInteractionEnabled = true
         view.addSubview(v)
         v.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview().inset(100)
-//            make.height.equalTo(500)
-            make.height.equalTo(500)
-            
+            make.height.equalTo(1)
         }
-        
+        v.updateHeightHandler = {[weak self] height in
+            self?.v.snp.updateConstraints { make in
+                make.height.equalTo(height)
+            }
+        }
     }
 
     private func test() {
@@ -41,8 +44,8 @@ class ViewController: UIViewController {
     }
     
     
-//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-////        v.setNeedsDisplay()
-//    }
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        v.attributedText = defaultAtr + defaultAtr
+    }
 }
 

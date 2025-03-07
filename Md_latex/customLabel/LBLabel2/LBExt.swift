@@ -19,6 +19,12 @@ extension NSAttributedString {
         return NSRange(location: 0, length: self.length)
     }
     
+    static func + (l: NSAttributedString, r: NSAttributedString) -> NSMutableAttributedString {
+        let t = NSMutableAttributedString(attributedString: l)
+        t.append(r)
+        return t
+    }
+    
     //MARK: convinence create NSMutableAttributedString
     static func normal(_ str: String) -> NSMutableAttributedString {
         let t = NSMutableAttributedString(string: str)
