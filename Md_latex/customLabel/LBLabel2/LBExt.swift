@@ -5,8 +5,8 @@
 //  Created by libing on 6/3/25.
 //
 
-import Foundation
-
+import UIKit
+import CoreText
 
 extension CFRange {
     static var zero: CFRange {
@@ -18,11 +18,156 @@ extension NSAttributedString {
     var range: NSRange {
         return NSRange(location: 0, length: self.length)
     }
+    
+    //MARK: convinence create NSMutableAttributedString
+    static func normal(_ str: String) -> NSMutableAttributedString {
+        let t = NSMutableAttributedString(string: str)
+        return t
+    }
+    
+    static func click(_ str: String) -> NSMutableAttributedString {
+        let t = NSMutableAttributedString.placeholer(.zero)
+        t.append(.normal(str).click(true))
+        t.append(NSMutableAttributedString.placeholer(.zero))
+        return t
+    }
+    
+    static func placeholer(_ info: RunDelegateInfo) -> NSMutableAttributedString {
+        let t = NSMutableAttributedString.normal(invisibleCharString)
+        return t.kRunDelegate(info)
+    }
+    
+}
+
+extension NSMutableAttributedString {
+    //MARK: - addAttribute
+    @discardableResult
+    func font(_ font: UIFont) -> Self {
+        addAttribute(.font, value: font, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func paragraphStyle(_ style: NSParagraphStyle) -> Self {
+        addAttribute(.paragraphStyle, value: style, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func foregroundColor(_ color: UIColor) -> Self {
+        addAttribute(.foregroundColor, value: color, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func backgroundColor(_ color: UIColor) -> Self {
+        addAttribute(.backgroundColor, value: color, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func ligature(_ n: Int) -> Self {
+        addAttribute(.ligature, value: n, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func kern(_ n: Int) -> Self {
+        addAttribute(.kern, value: n, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func strikethroughStyle(_ n: Int) -> Self {
+        addAttribute(.strikethroughStyle, value: n, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func underlineStyle(_ n: Int) -> Self {
+        addAttribute(.underlineStyle, value: n, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func strokeColor(_ color: UIColor) -> Self {
+        addAttribute(.strokeColor, value: color, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func strokeWidth(_ n: Int) -> Self {
+        addAttribute(.strokeWidth, value: n, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func shadow(_ shadow: NSShadow) -> Self {
+        addAttribute(.shadow, value: shadow, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func textEffect(_ str: String) -> Self {
+        addAttribute(.textEffect, value: str, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func attachment(_ attachment: NSTextAttachment) -> Self {
+        addAttribute(.attachment, value: attachment, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func link(_ url: NSURL) -> Self {
+        addAttribute(.link, value: url, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func baselineOffset(_ n: Int) -> Self {
+        addAttribute(.baselineOffset, value: n, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func underlineColor(_ color: UIColor) -> Self {
+        addAttribute(.underlineColor, value: color, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func strikethroughColor(_ color: UIColor) -> Self {
+        addAttribute(.strikethroughColor, value: color, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func writingDirection(_ v: [Int]) -> Self {
+        addAttribute(.writingDirection, value: v, range: range)
+        return self
+    }
+    //MARK: - custom
+    
+    @discardableResult
+    func click(_ can: Bool) -> Self {
+        addAttribute(.click, value: can, range: range)
+        return self
+    }
+    
+    @discardableResult
+    func kRunDelegate(_ info: RunDelegateInfo) -> Self {
+        addAttribute(.kRunDelegate, value: createRunDelegate(info: info), range: range)
+        return self
+    }
+    
+    //MARK: -
 }
 
 extension NSAttributedString.Key {
     
     static let click: Self = .init("click") // Bool, true:可点
     
-    
+    static let kRunDelegate: Self = .init(kCTRunDelegateAttributeName as String)
 }

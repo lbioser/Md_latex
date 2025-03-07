@@ -6,17 +6,38 @@
 //
 
 import Foundation
+import CoreText
+
+func createRunDelegate(info: RunDelegateInfo) -> Any {
+    // 转换为指针并保留引用计数
+    let infoPointer = Unmanaged.passRetained(info).toOpaque()
+    
+    var callbacks = CTRunDelegateCallbacks(
+        version: kCTRunDelegateVersion1,
+        dealloc: deallocCallback,
+        getAscent: getAscentCallback,
+        getDescent: getDescentCallback,
+        getWidth: getWidthCallback
+    )
+    
+    let rundelegate = CTRunDelegateCreate(&callbacks, infoPointer)
+    
+    return rundelegate as Any
+}
+
 
 class RunDelegateInfo {
-    let width: CGFloat
-    let ascent: CGFloat
-    let descent: CGFloat
+    let width: CGFloat // 自定义宽度
+    let ascent: CGFloat // 基线以上高度
+    let descent: CGFloat // 基线以下高度
     
     init(width: CGFloat, ascent: CGFloat, descent: CGFloat) {
         self.width = width
         self.ascent = ascent
         self.descent = descent
     }
+    
+    static let zero = RunDelegateInfo(width: 0, ascent: 0, descent: 0)
 }
 
 // 释放回调

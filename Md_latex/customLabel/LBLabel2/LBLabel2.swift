@@ -35,16 +35,16 @@ class LBLabel2: UIView {
     override func draw(_ rect: CGRect) {
         
         clear()
-        let bounds = bounds
         guard let attributedText else {
             return
         }
+        let bounds = bounds
         DispatchQueue.global().async {[self] in
             
             let render = UIGraphicsImageRenderer(bounds: bounds)
             let img = render.image { renderCtx in
                 let ctx = renderCtx.cgContext
-//                ctx.saveGState()
+                ctx.saveGState()
                 ctx.textMatrix = .identity
                 ctx.scaleBy(x: 1, y: -1)
                 ctx.translateBy(x: 0, y: -bounds.height)
@@ -179,7 +179,7 @@ class LBLabel2: UIView {
             
             runs.append(run)
             // 向前找：
-            for i in stride(from: index-1, to: 0, by: -1) {
+            for i in stride(from: index-1, to: -1, by: -1) {
                 let attributes = CTRunGetAttributes(runRects[i].0) as! [NSAttributedString.Key:Any]
                 if let _ = attributes[key] {
                     runs.insert(runRects[i].0, at: 0)
@@ -227,40 +227,42 @@ class LBLabel2: UIView {
 }
 
 
-
-
-
-
 //MARK: temp demo NSMutableAttributedString for test
+let invisibleCharString = String(Unicode.Scalar(0xFFFC)!)
 
 let defaultAtr = {
-    let atr = NSMutableAttributedString(string: "1234567890asd jkl kl 1we re we && * f8)) )())))) |||| fdf /// fd; fd fd;; ///// // // // // 34 ")
+    let atr = NSMutableAttributedString.normal("1234567890asd jkl kl 1we re we && * f8)) )())))) |||| fdf /// fd; fd fd;; ///// // // // // 34 ")
   
     let para = NSMutableParagraphStyle()
     para.lineSpacing = 10
-    atr.addAttribute(.paragraphStyle, value: para, range: atr.range)
-    atr.addAttribute(.kern, value: 5, range: atr.range)
-    atr.insert(NSAttributedString(string: "high high low low", attributes: [.font:UIFont.systemFont(ofSize: 30), .click:true]), at: 20)
-    var callbacks = CTRunDelegateCallbacks(
-        version: kCTRunDelegateVersion1,
-        dealloc: deallocCallback,
-        getAscent: getAscentCallback,
-        getDescent: getDescentCallback,
-        getWidth: getWidthCallback
-    )
-    
+    atr.paragraphStyle(para)
+
+    atr.insert(.click("High").font(.boldSystemFont(ofSize: 20)).foregroundColor(.red), at: 0)
+    atr.insert(.click("Book"), at: 0)
+
     let info = RunDelegateInfo(
         width: 100,   // 自定义宽度
         ascent: 20,   // 基线以上高度
         descent: 25    // 基线以下高度
     )
-    // 转换为指针并保留引用计数
-    let infoPointer = Unmanaged.passRetained(info).toOpaque()
+
+    atr.insert(.placeholer(info), at: 9)
     
-   
-    let rundelegate = CTRunDelegateCreate(&callbacks, infoPointer)
+    let info1 = RunDelegateInfo(
+        width: 150,   // 自定义宽度
+        ascent: 20,   // 基线以上高度
+        descent: 25    // 基线以下高度
+    )
+
+    atr.insert(.placeholer(info1), at: 10)
     
-    atr.insert(NSAttributedString(string: String(Unicode.Scalar(0xFFFC)!), attributes: [kCTRunDelegateAttributeName as NSAttributedString.Key : rundelegate]), at: 9)
+    let info2 = RunDelegateInfo(
+        width: 250,   // 自定义宽度
+        ascent: 20,   // 基线以上高度
+        descent: 25    // 基线以下高度
+    )
+    atr.insert(.placeholer(info2), at: 19)
+
     return atr
 }()
 
