@@ -8,7 +8,17 @@
 import UIKit
 import SnapKit
 import CoreText
+
 class ViewController: UIViewController {
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let vc = ViewController1()
+        present(vc, animated: true)
+    }
+    
+}
+
+class ViewController1: UIViewController {
     let label = LBLabel()
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,6 +75,11 @@ class ViewController: UIViewController {
         let cancel = UIAlertAction(title: "cancel", style: .cancel)
         alertvc.addAction(cancel)
         present(alertvc, animated: true)
+    }
+    
+    
+    deinit {
+        print(self,#function)
     }
     
 }

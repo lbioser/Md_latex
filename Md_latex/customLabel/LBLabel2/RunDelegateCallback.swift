@@ -42,6 +42,10 @@ class RunDelegateInfo {
     }
     
     static let zero = RunDelegateInfo(width: 0, ascent: 0, descent: 0)
+    
+    deinit {
+        print(self,#function)
+    }
 }
 
 // 释放回调

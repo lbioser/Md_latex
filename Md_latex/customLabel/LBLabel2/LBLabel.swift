@@ -142,6 +142,9 @@ class LBLabel: UILabel {
         
     }
     
+    deinit {
+        print(self,#function)
+    }
     //MARK: - backgroundColor
     
     private func setBackGroundColor(_ renderCtx: UIGraphicsImageRendererContext, in renderBounds: CGRect) {
