@@ -9,43 +9,39 @@ import UIKit
 import SnapKit
 import CoreText
 class ViewController: UIViewController {
-    let v = LBLabel()
+    let label = LBLabel()
     override func viewDidLoad() {
         super.viewDidLoad()
-        v.attributedText = defaultAtr
-        v.isUserInteractionEnabled = true
+        
+        let v = UIView()
+        v.backgroundColor = .white
         view.addSubview(v)
         v.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview().inset(100)
-            make.height.equalTo(1)
         }
-        v.updateHeightHandler = {[weak self] height in
-            self?.v.snp.updateConstraints { make in
+        
+        label.backgroundColor = .lightGray
+        label.numberOfLines = 0
+        label.font = UIFont.systemFont(ofSize: 20)
+        label.textColor = .green
+        label.attributedText = defaultAtr
+        label.isUserInteractionEnabled = true
+        v.addSubview(label)
+        label.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(10)
+            make.height.equalTo(1)// 设置高度为了约束完整，以便更新
+        }
+        label.updateHeightHandler = {[weak self] height in
+            self?.label.snp.updateConstraints { make in
                 make.height.equalTo(height)
             }
         }
     }
 
-    private func test() {
-        let matr = NSMutableAttributedString(string: "123456789")
-        
-        let attach = NSTextAttachment()
-        
-        matr.append(.init(attachment: attach))
-        
-        matr.append(.init(string: "123456789", attributes: [.font:UIFont.systemFont(ofSize: 20)]))
-  
-//        matr.enumerateAttributes(in: matr.range) { map, range, stop in
-//            print("----")
-//        }
-//        matr.enumerateAttribute(.font, in: NSRange(location: 9, length: 2)) { v, range, stop in
-//            print("----")
-//        }
-    }
-    
-    
+   
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        v.attributedText = defaultAtr + defaultAtr
+
+        
     }
 }
 

@@ -12,7 +12,15 @@ class LBLabel: UILabel {
     
     public override var attributedText: NSAttributedString? {
         didSet {
+            if oldValue?.string == attributedText?.string { return }
             setNeedsDisplay()
+        }
+    }
+    
+    public override var text: String? {
+        didSet {
+            guard let text else { return }
+            attributedText = .normal(text).font(font).foregroundColor(textColor)
         }
     }
     
@@ -20,7 +28,7 @@ class LBLabel: UILabel {
     
     public var updateHeightHandler: ((CGFloat) -> ())?
     
-    private(set) var textSuggestHeight: CGFloat = 0 {
+    private var textSuggestHeight: CGFloat = 0 {
         didSet {
             DispatchQueue.main.async {[self] in
                 updateHeightHandler?(textSuggestHeight)
@@ -30,8 +38,6 @@ class LBLabel: UILabel {
     
     private var runRects: [(CTRun,CGRect)] = []
     
-    
-    
     //MARK: - core draw
     
     override func draw(_ rect: CGRect) {
@@ -39,6 +45,8 @@ class LBLabel: UILabel {
         guard let attributedText else {
             return
         }
+        let numberOfLines = numberOfLines
+        let backgroundColor = backgroundColor
         //height大了之后会很卡,先取10_000
         let realHeight = bounds.height
         let height: CGFloat = 10_000
@@ -49,17 +57,29 @@ class LBLabel: UILabel {
             
             let frameSetter = CTFramesetterCreateWithAttributedString(attributedText)
             let ctframe = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, attributedText.length), UIBezierPath(rect: esatimalBounds).cgPath, nil)
-            // 建设尺寸，能容纳的最小尺寸
-            let suggestSize = CTFramesetterSuggestFrameSizeWithConstraints(frameSetter, CFRange.zero, nil, esatimalBounds.size, nil)
-           
+            
             let lines = CTFrameGetLines(ctframe) as! [CTLine]
             let lineCount = lines.count
+            let count = (numberOfLines == 0) ? lineCount : min(lineCount, numberOfLines)
+            // 判断是否需要展示截断符，小于总行数都需要展示截断符。
+            let needShowTruncation = count < lineCount;
+            
+            let lineRange = CTLineGetStringRange(lines[count-1])
+            // 建设尺寸，能容纳的最小尺寸
+            let suggestSize = CTFramesetterSuggestFrameSizeWithConstraints(frameSetter, CFRange(location: 0, length: (lineRange.location + lineRange.length)), nil, esatimalBounds.size, nil)
+            
+            
+            
             var origins:[CGPoint] = .init(repeating: .zero, count: lineCount)
             CTFrameGetLineOrigins(ctframe, CFRange.zero, &origins)
             
             let renderBounds = CGRect(x: 0, y: 0, width: width, height: realHeight) // 实际渲染的rect，和esatimalBounds不一样大
             let render = UIGraphicsImageRenderer(bounds: renderBounds)
             let img = render.image { renderCtx in
+                // 设置填充颜色为红色
+                backgroundColor?.setFill()
+                   // 填充整个绘制区域
+                renderCtx.fill(renderBounds)
                 let ctx = renderCtx.cgContext
                 ctx.saveGState()
                 ctx.textMatrix = .identity
@@ -73,15 +93,22 @@ class LBLabel: UILabel {
 //                    return .init(x: p.x, y: p.y+CGFloat(-10*i))
 //                })
                 
-                for i in 0..<lineCount {
-                    let line = lines[i]
+                for i in 0..<count { // line
+                    var line = lines[i]
+                    if i == count-1 && needShowTruncation { //最后一行要展示省略符的
+                        let lineRange = CTLineGetStringRange(line)
+                        line = createTruncatedLine(lineRange: lineRange) ?? line
+                    }
                     let runs = CTLineGetGlyphRuns(line) as! [CTRun]
                     // 一旦我们通过CTLineDraw绘制文字后，那么需要我们自己来设置行的位置，否则都位于最底下显示。
                     let origin = origins[i]
                     ctx.textPosition = CGPoint(x: origin.x, y: origin.y)
                     let runCount = runs.count
                    
-                    for j in 0..<runCount {
+                   
+                    
+                    
+                    for j in 0..<runCount { // run
                         let run = runs[j]
                         let range = CTRunGetStringRange(run)
                         
@@ -142,8 +169,17 @@ class LBLabel: UILabel {
     }
     
     
-    //MARK: -
+    //MARK: - TruncatedLine ...
     
+    private func createTruncatedLine(lineRange: CFRange) -> CTLine? {
+        let truncationAtr = NSAttributedString.normal("...").font(font).foregroundColor(textColor).truncate()
+        let drawLineAtr = attributedText!.attributedSubstring(from: NSRange(location: lineRange.location, length: lineRange.length)) + truncationAtr
+        let drawLine = CTLineCreateWithAttributedString(drawLineAtr as CFAttributedString)
+        let truncationTokenLine = CTLineCreateWithAttributedString(truncationAtr)
+        
+        let truncatedLine = CTLineCreateTruncatedLine(drawLine, bounds.width, .end, truncationTokenLine)
+        return truncatedLine
+    }
     
     
     
@@ -154,8 +190,15 @@ class LBLabel: UILabel {
         let location = touch?.location(in: self) ?? CGPoint(x: 0, y: CGFloat.infinity)
         for (run, rect) in runRects {
             if rect.contains(location) {
-                let clickedStr = joinRuns(findAroundRun(by: .click, around: run))
-                print(clickedStr)
+                if run.isTruncate {  //点到了省略号
+                    print("more more...")
+                } else if run.isKRunDelegate { //点到了占位图
+                    print("placeholer")
+                } else if run.isClick{ //点到了被标记为click的run
+                    let clickedStr = joinRuns(findAroundRun(by: .click, around: run))
+                    print(clickedStr)
+                }
+                
                 break
             }
         }
@@ -231,16 +274,15 @@ class LBLabel: UILabel {
 
 //MARK: temp demo NSMutableAttributedString for test
 let invisibleCharString = String(Unicode.Scalar(0xFFFC)!)
-
+let truncateCharString = String(Unicode.Scalar(0x2026)!) //...
 let defaultAtr = {
-    let atr = NSMutableAttributedString.normal("1234567890asd jkl kl 1we re we && * f8)) )())))) |||| fdf /// fd; fd fd;; ///// // // // // 34 ")
-  
+    let atr = NSMutableAttributedString.normal("1234567890asd jkl kl 1we re we && * f8)) )())))) |||| fdf /// fd; fd fd;; ///// // // // // 34 ").font(.systemFont(ofSize: 20))
     let para = NSMutableParagraphStyle()
-    para.lineSpacing = 10
+    para.lineSpacing = 5
     atr.paragraphStyle(para)
-
-    atr.insert(.click("High").font(.boldSystemFont(ofSize: 20)).foregroundColor(.red), at: 0)
-    atr.insert(.click("Book"), at: 0)
+    
+//    atr.insert(.click("High").font(.boldSystemFont(ofSize: 20)).foregroundColor(.red), at: 0)
+//    atr.insert(.click("Book").font(.systemFont(ofSize: 10)), at: 0)
 
     let info = RunDelegateInfo(
         width: 100,   // 自定义宽度

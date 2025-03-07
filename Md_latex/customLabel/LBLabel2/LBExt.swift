@@ -168,6 +168,12 @@ extension NSMutableAttributedString {
         return self
     }
     
+    @discardableResult
+    func truncate() -> Self {
+        addAttribute(.truncate, value: 1, range: range)
+        return self
+    }
+    
     //MARK: -
 }
 
@@ -176,4 +182,31 @@ extension NSAttributedString.Key {
     static let click: Self = .init("click") // Bool, true:可点
     
     static let kRunDelegate: Self = .init(kCTRunDelegateAttributeName as String)
+    
+    static let truncate: Self = .init("truncate") //用于标记省略点
+}
+
+
+extension CTRun {
+    var isClick: Bool {
+        let attributes = CTRunGetAttributes(self) as! [NSAttributedString.Key:Any]
+        if let _ = attributes[.click] {
+            return true
+        }
+        return false
+    }
+    var isKRunDelegate: Bool {
+        let attributes = CTRunGetAttributes(self) as! [NSAttributedString.Key:Any]
+        if let _ = attributes[.kRunDelegate] {
+            return true
+        }
+        return false
+    }
+    var isTruncate: Bool {
+        let attributes = CTRunGetAttributes(self) as! [NSAttributedString.Key:Any]
+        if let _ = attributes[.truncate] {
+            return true
+        }
+        return false
+    }
 }
