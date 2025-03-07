@@ -47,7 +47,6 @@ class LBLabel: UILabel {
             return
         }
         let numberOfLines = numberOfLines
-        let backgroundColor = backgroundColor
         //height大了之后会很卡,先取10_000
         let realHeight = bounds.height
         let height: CGFloat = 10_000
@@ -105,16 +104,17 @@ class LBLabel: UILabel {
                     for j in 0..<runCount { // run
                         let run = runs[j]
                         CTRunDraw(run, ctx, CFRange.zero) // 画
-
+                        if run.isStrokeBorder {
+                            strokerBorder(on: run, in: line, lineOrigin: origin, with: ctx) //画边框
+                        }
                         let realRunRect = calcRunRect(run: run, line: line, lineOrigin: origin, base: esatimalBounds)
                         runRects.append((run, realRunRect))
                         
                         let attributes = CTRunGetAttributes(run) as! [NSAttributedString.Key:Any]
                         if let runDelegate = attributes[.kRunDelegate] {
-                            let d = runDelegate as! CTRunDelegate
                             let rundelegateInfoP = CTRunDelegateGetRefCon(runDelegate as! CTRunDelegate)
                             let info = Unmanaged<RunDelegateInfo>.fromOpaque(rundelegateInfoP).takeUnretainedValue()
-                            
+                            print(info)
                             placeholerRects.append(realRunRect)
                         }
                     }
@@ -123,7 +123,7 @@ class LBLabel: UILabel {
                 ctx.restoreGState()
             }
             
-            DispatchQueue.main.async {
+            DispatchQueue.main.async {[self] in
                 textSuggestHeight = suggestSize.height
                 self.layer.contents = img.cgImage
                 placeholerRects.forEach { rect in
@@ -292,9 +292,9 @@ class LBLabel: UILabel {
 let invisibleCharString = String(Unicode.Scalar(0xFFFC)!)
 let truncateCharString = String(Unicode.Scalar(0x2026)!) //...
 let defaultAtr = {
-    let atr = NSMutableAttributedString.normal("1234567890asd jkl kl 1we re we && * f8)) )())))) |||| fdf /// fd; fd fd;; ///// // // // // 34 ").font(.systemFont(ofSize: 20))
+    let atr = NSMutableAttributedString.normal("1234567890asd jkl kl 1we re we && * f8)) )())))) |||| fdf /// fd; fd fd;; ///// // // // // 34 ").font(.systemFont(ofSize: 20)).strokeBorder()
     let para = NSMutableParagraphStyle()
-    para.lineSpacing = 5
+    para.lineSpacing = 0
     atr.paragraphStyle(para)
     
 //    atr.insert(.click("High").font(.boldSystemFont(ofSize: 20)).foregroundColor(.red), at: 0)

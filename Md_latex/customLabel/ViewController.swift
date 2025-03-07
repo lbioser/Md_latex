@@ -21,7 +21,7 @@ class ViewController: UIViewController {
         }
         
         label.backgroundColor = .lightGray
-        label.numberOfLines = 5
+        label.numberOfLines = 0
         label.font = UIFont.systemFont(ofSize: 20)
         label.textColor = .green
         label.attributedText = defaultAtr
