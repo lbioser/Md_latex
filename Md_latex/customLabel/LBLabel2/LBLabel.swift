@@ -25,9 +25,11 @@ class LBLabel: UILabel {
         }
     }
     
-    public var placeholerRects: [CGRect] = [] //占位rect
+    public var placeholerRects: [RunDelegateInfo] = [] //占位rectInfo
     
     public var updateHeightHandler: ((CGFloat) -> ())?
+    
+    public var clickHandler: ((NSAttributedString.Key.ClickType) -> ())?
     
     private var textSuggestHeight: CGFloat = 0 {
         didSet {
@@ -114,8 +116,9 @@ class LBLabel: UILabel {
                         if let runDelegate = attributes[.kRunDelegate] {
                             let rundelegateInfoP = CTRunDelegateGetRefCon(runDelegate as! CTRunDelegate)
                             let info = Unmanaged<RunDelegateInfo>.fromOpaque(rundelegateInfoP).takeUnretainedValue()
-                            print(info)
-                            placeholerRects.append(realRunRect)
+                            info.frame = realRunRect //记录
+                            info.run = run
+                            placeholerRects.append(info)
                         }
                     }
                     
@@ -126,8 +129,10 @@ class LBLabel: UILabel {
             DispatchQueue.main.async {[self] in
                 textSuggestHeight = suggestSize.height
                 self.layer.contents = img.cgImage
-                placeholerRects.forEach { rect in
-                    let v = UIView(frame: rect)
+                placeholerRects.forEach { info in
+                    guard let data = info.data else { return }
+                    let v = UIImageView(image: UIImage(data: data))
+                    v.frame = info.frame
                     v.backgroundColor = .gray
                     addSubview(v)
                 }
@@ -200,6 +205,14 @@ class LBLabel: UILabel {
     
     
     //MARK: - for click
+    
+    private func getRunDelegateInfo(by: CTRun) -> RunDelegateInfo? {
+        return placeholerRects.first { info in
+            info.run == by
+        }
+        
+    }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         let touch = touches.first
@@ -207,12 +220,15 @@ class LBLabel: UILabel {
         for (run, rect) in runRects {
             if rect.contains(location) {
                 if run.isTruncate {  //点到了省略号
-                    print("more more...")
+                    clickHandler?(.truncate)
                 } else if run.isKRunDelegate { //点到了占位图
-                    print("placeholer")
+                    if let info = getRunDelegateInfo(by: run) {
+                        clickHandler?(.placeholder(info))
+                    }
+                    
                 } else if run.isClick{ //点到了被标记为click的run
                     let clickedStr = joinRuns(findAroundRun(by: .click, around: run))
-                    print(clickedStr)
+                    clickHandler?(.click(clickedStr))
                 }
                 
                 break
@@ -292,34 +308,37 @@ class LBLabel: UILabel {
 let invisibleCharString = String(Unicode.Scalar(0xFFFC)!)
 let truncateCharString = String(Unicode.Scalar(0x2026)!) //...
 let defaultAtr = {
-    let atr = NSMutableAttributedString.normal("1234567890asd jkl kl 1we re we && * f8)) )())))) |||| fdf /// fd; fd fd;; ///// // // // // 34 ").font(.systemFont(ofSize: 20)).strokeBorder()
+    let atr = NSMutableAttributedString.normal("1234567890asd jkl kl 1we re we && * f8)) )())))) |||| fdf /// fd; fd fd;; ///// // // // // 34 ").font(.systemFont(ofSize: 20))
     let para = NSMutableParagraphStyle()
     para.lineSpacing = 0
     atr.paragraphStyle(para)
     
-//    atr.insert(.click("High").font(.boldSystemFont(ofSize: 20)).foregroundColor(.red), at: 0)
+    atr.insert(.click("High Low").font(.boldSystemFont(ofSize: 20)).foregroundColor(.green).strokeBorder(), at: 0)
 //    atr.insert(.click("Book").font(.systemFont(ofSize: 10)), at: 0)
 
     let info = RunDelegateInfo(
-        width: 100,   // 自定义宽度
-        ascent: 20,   // 基线以上高度
-        descent: 25    // 基线以下高度
+        data: UIImage(named: "1")?.pngData(),
+        width: 55,   // 自定义宽度
+        ascent: 40,   // 基线以上高度
+        descent: 5    // 基线以下高度
     )
 
     atr.insert(.placeholer(info), at: 9)
     
     let info1 = RunDelegateInfo(
-        width: 150,   // 自定义宽度
-        ascent: 20,   // 基线以上高度
-        descent: 25    // 基线以下高度
+        data: UIImage(named: "2")?.pngData(),
+        width: 100,   // 自定义宽度
+        ascent: 40,   // 基线以上高度
+        descent: 5    // 基线以下高度
     )
 
     atr.insert(.placeholer(info1), at: 10)
     
     let info2 = RunDelegateInfo(
-        width: 250,   // 自定义宽度
-        ascent: 20,   // 基线以上高度
-        descent: 25    // 基线以下高度
+        data: UIImage(named: "3")?.pngData(),
+        width: 200,   // 自定义宽度
+        ascent: 40,   // 基线以上高度
+        descent: 5    // 基线以下高度
     )
     atr.insert(.placeholer(info2), at: 19)
 

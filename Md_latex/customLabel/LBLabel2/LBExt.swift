@@ -192,6 +192,14 @@ extension NSAttributedString.Key {
     static let truncate: Self = .init("truncate") //用于标记省略点
     
     static let strokeBorder: Self = .init("strokeBorder") //边框
+    
+    
+    enum ClickType {
+        case click(String)  //点了click修饰的文本
+        case placeholder(RunDelegateInfo) //点了占位图
+        case truncate //点了省略号
+    }
+    
 }
 
 

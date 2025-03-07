@@ -27,11 +27,15 @@ func createRunDelegate(info: RunDelegateInfo) -> Any {
 
 
 class RunDelegateInfo {
+    var data: Data? //图片数据
+    var frame: CGRect = .zero
+    weak var run: CTRun?
     let width: CGFloat // 自定义宽度
     let ascent: CGFloat // 基线以上高度
     let descent: CGFloat // 基线以下高度
     
-    init(width: CGFloat, ascent: CGFloat, descent: CGFloat) {
+    init(data: Data? = nil, width: CGFloat, ascent: CGFloat, descent: CGFloat) {
+        self.data = data
         self.width = width
         self.ascent = ascent
         self.descent = descent

@@ -21,15 +21,31 @@ class ViewController: UIViewController {
         }
         
         label.backgroundColor = .lightGray
-        label.numberOfLines = 0
+        label.numberOfLines = 6
+        
         label.font = UIFont.systemFont(ofSize: 20)
         label.textColor = .green
         label.attributedText = defaultAtr
         label.isUserInteractionEnabled = true
+        label.layer.masksToBounds = true
+        
+        label.clickHandler = {[weak self] type in
+            guard let self else { return }
+            switch type {
+            case .click(let str):
+                showAlert(message: str)
+            case .placeholder(let info):
+                showAlert(message: "info.data")
+            case .truncate:
+                showAlert(message: "more more...")
+          
+            }
+        }
+        
         v.addSubview(label)
         label.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(10)
-            make.height.equalTo(1)// 设置高度为了约束完整，以便更新
+            make.height.equalTo(0.5)// 设置高度为了约束完整，以便更新
         }
         label.updateHeightHandler = {[weak self] height in
             self?.label.snp.updateConstraints { make in
@@ -43,5 +59,13 @@ class ViewController: UIViewController {
 
         
     }
+    
+    func showAlert(message: String) {
+        let alertvc = UIAlertController(title: "xxx", message: message, preferredStyle: .alert)
+        let cancel = UIAlertAction(title: "cancel", style: .cancel)
+        alertvc.addAction(cancel)
+        present(alertvc, animated: true)
+    }
+    
 }
 
