@@ -7,7 +7,8 @@
 
 import UIKit
 import CoreText
-
+/// 就像普通的label一样使用
+/// 支持背景色，换行，自适应size，占位图，省略号，点击某个字符
 class LBLabel: UILabel {
     
     public override var attributedText: NSAttributedString? {
@@ -76,15 +77,11 @@ class LBLabel: UILabel {
             let renderBounds = CGRect(x: 0, y: 0, width: width, height: realHeight) // 实际渲染的rect，和esatimalBounds不一样大
             let render = UIGraphicsImageRenderer(bounds: renderBounds)
             let img = render.image { renderCtx in
-                // 设置填充颜色为红色
-                backgroundColor?.setFill()
-                   // 填充整个绘制区域
-                renderCtx.fill(renderBounds)
+                setBackGroundColor(renderCtx, in: renderBounds)
                 let ctx = renderCtx.cgContext
                 ctx.saveGState()
                 ctx.textMatrix = .identity
-                ctx.translateBy(x: 0, y: height)
-                ctx.scaleBy(x: 1, y: -1)
+                resetDrawCoordinate(on: ctx, height: height)
                 
                 //手动调整行高
 //                var i = -1
@@ -104,50 +101,22 @@ class LBLabel: UILabel {
                     let origin = origins[i]
                     ctx.textPosition = CGPoint(x: origin.x, y: origin.y)
                     let runCount = runs.count
-                   
-                   
-                    
-                    
+
                     for j in 0..<runCount { // run
                         let run = runs[j]
-                        let range = CTRunGetStringRange(run)
-                        
-                        let offsetx = CTLineGetOffsetForStringIndex(line, range.location, nil)
                         CTRunDraw(run, ctx, CFRange.zero) // 画
 
-                        var ascent: CGFloat = 0
-                        var descent: CGFloat = 0
-                        var leading: CGFloat = 0
-                        let w = CTRunGetTypographicBounds(run, CFRange.zero, &ascent, &descent, &leading)
-                        ctx.saveGState()
-                        
-                        let runRect = CGRect(x: leading+offsetx, y: origin.y-descent, width: w, height: ascent+descent)
-                        let p = UIBezierPath(rect: runRect)
-                        p.lineWidth = 1
-                        UIColor.red.setStroke()
-                        ctx.addPath(p.cgPath)
-                        ctx.strokePath()
-                        ctx.restoreGState()
-                        
-                        let attributes = CTRunGetAttributes(run) as! [NSAttributedString.Key:Any]
-                        
-                        let realRunRect = CGRect(x: leading+offsetx, y: esatimalBounds.height - (origin.y-descent) - (ascent+descent), width: w, height: ascent+descent)
-                        
+                        let realRunRect = calcRunRect(run: run, line: line, lineOrigin: origin, base: esatimalBounds)
                         runRects.append((run, realRunRect))
                         
-                        if let runDelegate = attributes[kCTRunDelegateAttributeName as NSAttributedString.Key] {
+                        let attributes = CTRunGetAttributes(run) as! [NSAttributedString.Key:Any]
+                        if let runDelegate = attributes[.kRunDelegate] {
                             let d = runDelegate as! CTRunDelegate
                             let rundelegateInfoP = CTRunDelegateGetRefCon(runDelegate as! CTRunDelegate)
                             let info = Unmanaged<RunDelegateInfo>.fromOpaque(rundelegateInfoP).takeUnretainedValue()
                             
                             placeholerRects.append(realRunRect)
                         }
-                        
-                        if let clicked = attributes[.click] as? Bool, clicked{
-                            
-                        }
-                        
-                        
                     }
                     
                 }
@@ -166,6 +135,53 @@ class LBLabel: UILabel {
             
         }
         
+    }
+    
+    //MARK: - backgroundColor
+    
+    private func setBackGroundColor(_ renderCtx: UIGraphicsImageRendererContext, in renderBounds: CGRect) {
+        // 设置填充颜色为红色
+        backgroundColor?.setFill()
+           // 填充整个绘制区域
+        renderCtx.fill(renderBounds)
+    }
+    
+    private func resetDrawCoordinate(on ctx: CGContext, height: CGFloat) {
+        ctx.translateBy(x: 0, y: height)
+        ctx.scaleBy(x: 1, y: -1)
+    }
+    
+    //MARK: - stroke border
+    
+    private func calcRunRect(run: CTRun, line: CTLine, lineOrigin origin: CGPoint,base esatimalBounds: CGRect) -> CGRect {
+        let range = CTRunGetStringRange(run)
+        let offsetx = CTLineGetOffsetForStringIndex(line, range.location, nil)
+        var ascent: CGFloat = 0
+        var descent: CGFloat = 0
+        var leading: CGFloat = 0
+        let w = CTRunGetTypographicBounds(run, CFRange.zero, &ascent, &descent, &leading)
+        
+        let realRunRect = CGRect(x: leading+offsetx, y: esatimalBounds.height - (origin.y-descent) - (ascent+descent), width: w, height: ascent+descent)
+        return realRunRect
+    }
+    
+    private func strokerBorder(on run: CTRun, in line: CTLine, lineOrigin origin: CGPoint, with ctx: CGContext) {
+        let range = CTRunGetStringRange(run)
+        let offsetx = CTLineGetOffsetForStringIndex(line, range.location, nil)
+        
+        var ascent: CGFloat = 0
+        var descent: CGFloat = 0
+        var leading: CGFloat = 0
+        let w = CTRunGetTypographicBounds(run, CFRange.zero, &ascent, &descent, &leading)
+        ctx.saveGState()
+        
+        let runRect = CGRect(x: leading+offsetx, y: origin.y-descent, width: w, height: ascent+descent)
+        let p = UIBezierPath(rect: runRect)
+        p.lineWidth = 1
+        UIColor.red.setStroke()
+        ctx.addPath(p.cgPath)
+        ctx.strokePath()
+        ctx.restoreGState()
     }
     
     

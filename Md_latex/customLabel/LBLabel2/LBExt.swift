@@ -174,6 +174,12 @@ extension NSMutableAttributedString {
         return self
     }
     
+    @discardableResult
+    func strokeBorder() -> Self {
+        addAttribute(.strokeBorder, value: 1, range: range)
+        return self
+    }
+    
     //MARK: -
 }
 
@@ -184,6 +190,8 @@ extension NSAttributedString.Key {
     static let kRunDelegate: Self = .init(kCTRunDelegateAttributeName as String)
     
     static let truncate: Self = .init("truncate") //用于标记省略点
+    
+    static let strokeBorder: Self = .init("strokeBorder") //边框
 }
 
 
@@ -205,6 +213,14 @@ extension CTRun {
     var isTruncate: Bool {
         let attributes = CTRunGetAttributes(self) as! [NSAttributedString.Key:Any]
         if let _ = attributes[.truncate] {
+            return true
+        }
+        return false
+    }
+    
+    var isStrokeBorder: Bool {
+        let attributes = CTRunGetAttributes(self) as! [NSAttributedString.Key:Any]
+        if let _ = attributes[.strokeBorder] {
             return true
         }
         return false
