@@ -52,9 +52,9 @@ class ViewController1: UIViewController {
             }
         }
         
-        v.addSubview(label)
+        view.addSubview(label)
         label.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(10)
+            make.top.leading.trailing.equalToSuperview().inset(10)
             make.height.equalTo(0.5)// 设置高度为了约束完整，以便更新
         }
         label.updateHeightHandler = {[weak self] height in

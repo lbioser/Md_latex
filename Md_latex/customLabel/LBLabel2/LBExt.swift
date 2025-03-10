@@ -179,10 +179,15 @@ extension NSMutableAttributedString {
         addAttribute(.strokeBorder, value: 1, range: range)
         return self
     }
-    
+    @discardableResult
+    func seletedColor(_ color: UIColor) -> Self {
+        addAttribute(.seletedColor, value: color, range: range)
+        return self
+    }
     //MARK: -
 }
 
+//MARK: - custom key
 extension NSAttributedString.Key {
     
     static let click: Self = .init("click") // Bool, true:可点
@@ -193,6 +198,7 @@ extension NSAttributedString.Key {
     
     static let strokeBorder: Self = .init("strokeBorder") //边框
     
+    static let seletedColor: Self = .init("seletedColor") //选中时的颜色 UIColor
     
     enum ClickType {
         case click(String)  //点了click修饰的文本
@@ -232,5 +238,13 @@ extension CTRun {
             return true
         }
         return false
+    }
+    
+    func seletedColor() -> UIColor? {
+        let attributes = CTRunGetAttributes(self) as! [NSAttributedString.Key:Any]
+        if let color = attributes[.seletedColor] as? UIColor {
+            return color
+        }
+        return nil
     }
 }

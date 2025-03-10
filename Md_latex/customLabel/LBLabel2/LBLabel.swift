@@ -13,7 +13,7 @@ class LBLabel: UILabel {
     
     public override var attributedText: NSAttributedString? {
         didSet {
-            if oldValue?.string == attributedText?.string { return }
+//            if oldValue?.string == attributedText?.string { return }
             setNeedsDisplay()
         }
     }
@@ -22,6 +22,18 @@ class LBLabel: UILabel {
         didSet {
             guard let text else { return }
             attributedText = .normal(text).font(font).foregroundColor(textColor)
+        }
+    }
+    
+    override var isUserInteractionEnabled: Bool {
+        didSet {
+            if isUserInteractionEnabled {
+                addGestureRecognizer(tapGesture)
+                addGestureRecognizer(pressGesture)
+            } else {
+                removeGestureRecognizer(tapGesture)
+                removeGestureRecognizer(pressGesture)
+            }
         }
     }
     
@@ -39,7 +51,7 @@ class LBLabel: UILabel {
         }
     }
     
-    private var runRects: [(CTRun,CGRect)] = []
+    private var lineRunsModels: [LBLineRunsModel] = []
     
     //MARK: - core draw
     
@@ -97,6 +109,9 @@ class LBLabel: UILabel {
                         let lineRange = CTLineGetStringRange(line)
                         line = createTruncatedLine(lineRange: lineRange) ?? line
                     }
+                    
+                    var lineRunsModel = LBLineRunsModel(line: line, runs: [])
+                    lineRunsModels.append(lineRunsModel)
                     let runs = CTLineGetGlyphRuns(line) as! [CTRun]
                     // 一旦我们通过CTLineDraw绘制文字后，那么需要我们自己来设置行的位置，否则都位于最底下显示。
                     let origin = origins[i]
@@ -110,7 +125,16 @@ class LBLabel: UILabel {
                             strokerBorder(on: run, in: line, lineOrigin: origin, with: ctx) //画边框
                         }
                         let realRunRect = calcRunRect(run: run, line: line, lineOrigin: origin, base: esatimalBounds)
-                        runRects.append((run, realRunRect))
+                       
+                        lineRunsModel.runs.append(LBRunModel(run: run, rect: realRunRect))
+                       
+                        if let seletedColor = run.seletedColor() {
+//                            let layer = CALayer()
+//                            layer.backgroundColor = seletedColor.cgColor
+//                            ctx.draw(CGLayer(layer), in: realRunRect)
+                            ctx.setFillColor(seletedColor.cgColor)
+                            ctx.fill([realRunRect])
+                        }
                         
                         let attributes = CTRunGetAttributes(run) as! [NSAttributedString.Key:Any]
                         if let runDelegate = attributes[.kRunDelegate] {
@@ -209,38 +233,83 @@ class LBLabel: UILabel {
     
     //MARK: - for click
     
+    lazy var tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapClick))
+    
+    lazy var pressGesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressClick))
+    
+    @objc private func tapClick(_ gesture: UITapGestureRecognizer) {
+        switch gesture.state {
+        case .ended:
+            let location = gesture.location(in: self)
+            let runRects = lineRunsModels.reduce([LBRunModel]()) { partialResult, lineRunsModel in
+                return partialResult+lineRunsModel.runs
+            }
+            for runRect in runRects {
+                if runRect.rect.contains(location) {
+                    if runRect.run.isTruncate {  //点到了省略号
+                        clickHandler?(.truncate)
+                    } else if runRect.run.isKRunDelegate { //点到了占位图
+                        if let info = getRunDelegateInfo(by: runRect.run) {
+                            clickHandler?(.placeholder(info))
+                        }
+                        
+                    } else if runRect.run.isClick{ //点到了被标记为click的run
+                        let clickedStr = joinRuns(findAroundRun(by: .click, around: runRect.run))
+                        clickHandler?(.click(clickedStr))
+                    }
+                    
+                    break
+                }
+            }
+        default:
+            break
+        }
+    }
+    
+    @objc private func longPressClick(_ gesture: UILongPressGestureRecognizer) {
+        var startIndex: CFIndex = 0
+        var endIndex: CFIndex = 0
+        switch gesture.state {
+        case .began:
+            let p = gesture.location(in: self)
+            var line = getLineByPoint(p)
+            guard let line else { return }
+            startIndex = CTLineGetStringIndexForPosition(line, p)
+        case  .changed, .ended:
+            let p = gesture.location(in: self)
+            var line = getLineByPoint(p)
+            guard let line else { return }
+            
+            endIndex = CTLineGetStringIndexForPosition(line, p)
+            
+            let atr = attributedText?.mutableCopy() as? NSMutableAttributedString
+            let range = NSRange(location: Int(startIndex), length: abs(Int(startIndex) - Int(endIndex)))
+            atr?.seletedColor(.red)
+            attributedText = atr
+            
+            
+        default:
+            break
+        }
+    }
+    
+    private func getLineByPoint(_ p: CGPoint) -> CTLine? {
+        var line: CTLine?
+        for lineRunsModel in lineRunsModels {
+            for runRect in lineRunsModel.runs {
+                if runRect.rect.contains(p) {
+                    line = lineRunsModel.line
+                    return line
+                }
+            }
+        }
+        return nil
+    }
+    
     private func getRunDelegateInfo(by: CTRun) -> RunDelegateInfo? {
         return placeholerRects.first { info in
             info.run == by
         }
-        
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesBegan(touches, with: event)
-        let touch = touches.first
-        let location = touch?.location(in: self) ?? CGPoint(x: 0, y: CGFloat.infinity)
-        for (run, rect) in runRects {
-            if rect.contains(location) {
-                if run.isTruncate {  //点到了省略号
-                    clickHandler?(.truncate)
-                } else if run.isKRunDelegate { //点到了占位图
-                    if let info = getRunDelegateInfo(by: run) {
-                        clickHandler?(.placeholder(info))
-                    }
-                    
-                } else if run.isClick{ //点到了被标记为click的run
-                    let clickedStr = joinRuns(findAroundRun(by: .click, around: run))
-                    clickHandler?(.click(clickedStr))
-                }
-                
-                break
-            }
-        }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesEnded(touches, with: event)
         
     }
     
@@ -253,16 +322,19 @@ class LBLabel: UILabel {
     private func findAroundRun(by key: NSAttributedString.Key, around run: CTRun) -> [CTRun] {
         let attributes = CTRunGetAttributes(run) as! [NSAttributedString.Key:Any]
         var runs: [CTRun] = []
-        if let index = runRects.firstIndex(where: { (r, rect) in
-            r == run
+        let runRects = lineRunsModels.reduce([LBRunModel]()) { partialResult, lineRunsModel in
+            return partialResult+lineRunsModel.runs
+        }
+        if let index = runRects.firstIndex(where: { r in
+            r.run == run
         }), attributes[key] != nil {
             
             runs.append(run)
             // 向前找：
             for i in stride(from: index-1, to: -1, by: -1) {
-                let attributes = CTRunGetAttributes(runRects[i].0) as! [NSAttributedString.Key:Any]
+                let attributes = CTRunGetAttributes(runRects[i].run) as! [NSAttributedString.Key:Any]
                 if let _ = attributes[key] {
-                    runs.insert(runRects[i].0, at: 0)
+                    runs.insert(runRects[i].run, at: 0)
                 } else {
                     break
                 }
@@ -270,9 +342,9 @@ class LBLabel: UILabel {
             }
             //向后找：
             for i in stride(from: index+1, to: runRects.count, by: 1) {
-                let attributes = CTRunGetAttributes(runRects[i].0) as! [NSAttributedString.Key:Any]
+                let attributes = CTRunGetAttributes(runRects[i].run) as! [NSAttributedString.Key:Any]
                 if let _ = attributes[key] {
-                    runs.append(runRects[i].0)
+                    runs.append(runRects[i].run)
                 } else {
                     break
                 }
@@ -300,7 +372,7 @@ class LBLabel: UILabel {
     
     private func clear() {
         placeholerRects.removeAll(keepingCapacity: true)
-        runRects.removeAll(keepingCapacity: true)
+        lineRunsModels.removeAll(keepingCapacity: true)
         subviews.forEach { $0.removeFromSuperview() }
     }
     
